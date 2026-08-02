@@ -38,14 +38,24 @@ function previewProject(project) {
   restartAnimation(project);
 }
 
+function togglePinned(project) {
+  const shouldOpen = !project.open || project.classList.contains('is-preview');
+  if (shouldOpen) openPinned(project);
+  else closeProject(project);
+}
+
 for (const project of projects) {
   const summary = project.querySelector('.project-summary');
 
   summary.addEventListener('click', (event) => {
     event.preventDefault();
-    const shouldOpen = !project.open || project.classList.contains('is-preview');
-    if (shouldOpen) openPinned(project);
-    else closeProject(project);
+    togglePinned(project);
+  });
+
+  summary.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    togglePinned(project);
   });
 
   project.addEventListener('pointerenter', () => previewProject(project));

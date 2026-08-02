@@ -487,7 +487,7 @@ test('enhancement implements pinned and fine-hover states without unsafe DOM API
   assertStaticScript(js);
 });
 
-test('enhancement applies progressive disclosure states through real controller events', async () => {
+test('enhancement applies progressive disclosure states and keyboard activation through real controller events', async () => {
   class FakeClassList {
     constructor(trace) {
       this.values = new Set();
@@ -522,8 +522,9 @@ test('enhancement applies progressive disclosure states through real controller 
       this.listeners.set(type, listener);
     }
 
-    dispatch(type) {
+    dispatch(type, init = {}) {
       const event = {
+        ...init,
         defaultPrevented: false,
         preventDefault() {
           this.defaultPrevented = true;
@@ -609,6 +610,34 @@ test('enhancement applies progressive disclosure states through real controller 
   fineHover.matches = false;
   projects[2].dispatch('pointerenter');
   assert.equal(projects[2].open, false);
+
+  const enterOpen = projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  assert.equal(enterOpen.defaultPrevented, true);
+  assert.equal(projects[0].open, true);
+  assert.equal(projects[0].classList.contains('is-pinned'), true);
+
+  const enterClose = projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  assert.equal(enterClose.defaultPrevented, true);
+  assert.equal(projects[0].open, false);
+  assert.equal(projects[0].classList.contains('is-pinned'), false);
+
+  projects[0].summary.dispatch('click');
+  const spaceOpen = projects[1].summary.dispatch('keydown', { key: ' ' });
+  assert.equal(spaceOpen.defaultPrevented, true);
+  assert.equal(projects[0].open, false);
+  assert.equal(projects[0].classList.contains('is-pinned'), false);
+  assert.equal(projects[1].open, true);
+  assert.equal(projects[1].classList.contains('is-pinned'), true);
+
+  const spaceClose = projects[1].summary.dispatch('keydown', { key: ' ' });
+  assert.equal(spaceClose.defaultPrevented, true);
+  assert.equal(projects[1].open, false);
+  assert.equal(projects[1].classList.contains('is-pinned'), false);
+
+  const nonActivation = projects[2].summary.dispatch('keydown', { key: 'ArrowDown' });
+  assert.equal(nonActivation.defaultPrevented, false);
+  assert.equal(projects[2].open, false);
+  assert.equal(projects[2].classList.contains('is-pinned'), false);
 });
 
 test('artifact manifest and size stay inside the approved budget', async () => {
