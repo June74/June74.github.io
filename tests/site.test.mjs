@@ -787,10 +787,39 @@ test('final review mutation: encoded GitHub anchors cannot evade count or protec
   assert.throws(() => assertApprovedOutboundAnchors(duplicateHref));
 });
 
-test('Pages workflow uploads only the curated site directory', async () => {
+test('Pages workflow is fully pinned, serialized, and uploads only the curated site directory', async () => {
   const workflow = await readFile(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
-  assert.match(workflow, /path:\s*site/);
-  assert.doesNotMatch(workflow, /path:\s*\.|docs\/|\.superpowers/);
+  const actionReferences = [...workflow.matchAll(/uses:\s+(actions\/[^@\s]+)@([0-9a-f]{40})/g)].map((match) => `${match[1]}@${match[2]}`);
+  assert.match(workflow, /contents:\s*read/);
   assert.match(workflow, /pages:\s*write/);
   assert.match(workflow, /id-token:\s*write/);
+  assert.match(workflow, /- run:\s*node --test tests\/site\.test\.mjs/);
+  assert.match(workflow, /path:\s*site/);
+  assert.doesNotMatch(workflow, /path:\s*\.|docs\/|\.superpowers/);
+  assert.match(workflow, /cancel-in-progress:\s*false/);
+  assert.doesNotMatch(workflow, /uses:\s+[^@\s]+@(main|master|v\d+(?:\.\d+)*)\b/);
+  assert.deepEqual(actionReferences, [
+    'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1',
+    'actions/setup-node@820762786026740c76f36085b0efc47a31fe5020',
+    'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1',
+    'actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d',
+    'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9',
+    'actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128',
+  ]);
+});
+
+test('predeployment checklist separates post-authorization live-URL acceptance from local readiness', async () => {
+  const checklist = await readFile(path.join(root, 'docs', 'release', 'predeployment-checklist.md'), 'utf8');
+  assert.match(checklist, /## Post-authorization live-URL acceptance/);
+  assert.match(checklist, /only after explicit owner deployment authorization/i);
+  assert.match(checklist, /cannot be filled by local preview/i);
+  assert.match(checklist, /actual public URL availability/i);
+  assert.match(checklist, /HTTPS/i);
+  assert.match(checklist, /expected redirects/i);
+  assert.match(checklist, /navigation/i);
+  assert.match(checklist, /project disclosure/i);
+  assert.match(checklist, /GitHub link/i);
+  assert.match(checklist, /browser console errors/i);
+  assert.match(checklist, /unexpected network requests/i);
+  assert.match(checklist, /final URL\/artifact confirmation/i);
 });

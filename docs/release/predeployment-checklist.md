@@ -17,6 +17,16 @@ This checklist records local readiness evidence. It is not authority to create a
 - [ ] **Account and repository preflight** — owner controls the intended account; repository name, visibility, GitHub Actions Pages source, and available free-tier limits are confirmed:
 - [ ] **Explicit deployment authorization** — owner authorizes repository creation or use, remote push, public visibility, Pages enablement, and the specific release commit:
 
+## Post-authorization live-URL acceptance
+
+Complete this section only after explicit owner deployment authorization. These checks use the actual public URL and cannot be filled by local preview.
+
+- [ ] **Actual public URL availability** — public URL resolves to the intended site:
+- [ ] **HTTPS and expected redirects** — HTTPS is valid and redirects match the approved deployment path:
+- [ ] **Public interaction behavior** — navigation, each project disclosure, and the GitHub link work at the public URL:
+- [ ] **Browser console errors and unexpected network requests** — browser console is clean and network activity contains no unexpected requests:
+- [ ] **Final URL/artifact confirmation** — final public URL serves the approved `site/` artifact:
+
 ## $0 hosting constraints
 
 GitHub Pages is the intended no-required-cost hosting path. Confirm the account and repository configuration can use it before deployment; provider plans, limits, and availability are external conditions and may change. A paid domain or paid service is not required.
