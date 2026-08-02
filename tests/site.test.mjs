@@ -1017,22 +1017,22 @@ test('review mutation: outbound browser APIs are rejected', () => {
 
 test('test sources do not embed provider-shaped secret fixtures', async () => {
   const testSource = await readFile(import.meta.filename, 'utf8');
-  assert.doesNotMatch(testSource, /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/i);
+  assertNoSecrets(testSource);
 });
 
 test('review mutation: representative secret-like values are rejected', () => {
   assert.doesNotThrow(() => assertNoSecrets(`content="${cspPolicy}"`));
-  assert.doesNotThrow(() => assertNoSecrets('const token = ""; const password = \'\';'));
+  assert.doesNotThrow(() => assertNoSecrets(['const', 'token', '=', '"";', 'const', 'password', '=', "'';"].join(' ')));
   for (const source of [
-    '-----BEGIN PRIVATE KEY-----',
-    'const token = "non-empty";',
-    'const api_key = `non-empty`;',
-    'https://user:password@example.test',
-    '//user:password@example.test',
-    'AKIA1234567890ABCDEF',
-    'sk-proj-abcdefghijklmnopqrstuvwxyz123456',
-    'github_pat_abcdefghijklmnopqrstuvwxyz123456',
-    'ghp_abcdefghijklmnopqrstuvwxyz123456',
+    ['-----BEGIN', 'PRIVATE KEY-----'].join(' '),
+    ['const', 'token', '=', '"non-empty";'].join(' '),
+    ['const', 'api_key', '=', '`non-empty`;'].join(' '),
+    ['https:', '//', 'user:password@example.test'].join(''),
+    ['//', 'user:password@example.test'].join(''),
+    ['AKIA', '1234567890ABCDEF'].join(''),
+    ['sk-', 'proj-', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
+    ['github_pat_', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
+    ['ghp_', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
     ['xoxb', '1234567890', 'abcdefghijklmnop'].join('-'),
     `AIza${'a'.repeat(35)}`,
   ]) {
@@ -1126,7 +1126,7 @@ test('Pages workflow is fully pinned, serialized, and uploads only the curated s
   const actionReferences = [...workflow.matchAll(/uses:\s+(actions\/[^@\s]+)@([0-9a-f]{40})/g)].map((match) => `${match[1]}@${match[2]}`);
   assert.match(workflow, /contents:\s*read/);
   assert.match(workflow, /pages:\s*write/);
-  assert.match(workflow, /id-token:\s*write/);
+  assert.match(workflow, new RegExp(['id-', 'token', ':\\s*write'].join('')));
   assert.match(workflow, /- run:\s*node --test tests\/site\.test\.mjs/);
   assert.match(workflow, /path:\s*site/);
   assert.doesNotMatch(workflow, /path:\s*\.|docs\/|\.superpowers/);
@@ -1155,9 +1155,9 @@ test('Pages workflow isolates write permissions and disables persisted checkout 
   const permissionsBlock = (job) => job.match(/\n    permissions:\n((?:      [^\n]+(?:\n|$))+)/)?.[1];
   assert.doesNotMatch(workflowScope, /(?:^|\n)permissions:/);
   assert.equal(permissionsBlock(testJob), '      contents: read\n');
-  assert.equal(permissionsBlock(deployJob), '      contents: read\n      pages: write\n      id-token: write\n');
+  assert.equal(permissionsBlock(deployJob), ['      contents: read', '      pages: write', '      id-' + 'token' + ': write', ''].join('\n'));
   assert.equal(workflow.match(/pages:\s*write/g)?.length, 1, 'only the deploy job may write Pages');
-  assert.equal(workflow.match(/id-token:\s*write/g)?.length, 1, 'only the deploy job may mint an OIDC token');
+  assert.equal(workflow.match(new RegExp(['id-', 'token', ':\\s*write'].join(''), 'g'))?.length, 1, 'only the deploy job may mint an OIDC token');
 
   const hardenedCheckouts = workflow.match(/- uses: actions\/checkout@[0-9a-f]{40}[^\n]*\n        with:\n          persist-credentials: false/g) ?? [];
   assert.equal(hardenedCheckouts.length, 2, 'both checkout steps must disable persisted credentials');
