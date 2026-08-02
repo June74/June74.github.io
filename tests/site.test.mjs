@@ -52,3 +52,25 @@ test('only approved outbound links are present', async () => {
     assert.match(link[0], /rel="noopener noreferrer"/);
   }
 });
+
+test('visual system uses only the approved accent tokens', async () => {
+  const css = await readSite('styles.css');
+  assert.match(css, /--forest:\s*#356351/i);
+  assert.match(css, /--copper:\s*#B86F4B/i);
+  assert.match(css, /--slate:\s*#718999/i);
+  assert.doesNotMatch(css, /ochre|#C5A253/i);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(css, /@media\s*\(max-width:\s*820px\)/);
+});
+
+test('favicon is a static local SVG', async () => {
+  const svg = await readFile(path.join(siteDir, 'assets', 'favicon.svg'), 'utf8');
+  assert.match(svg, /^<svg\b/);
+  const exactStandardNamespace = 'xmlns="http://www.w3.org/2000/svg"';
+  assert.ok(svg.includes(exactStandardNamespace));
+  const svgWithoutStandardNamespace = svg.replace(exactStandardNamespace, 'xmlns=""');
+  assert.doesNotMatch(svgWithoutStandardNamespace, /<script|on\w+=|foreignObject|https?:|data:/i);
+  assert.doesNotMatch(svg, /<(?:image|use)\b|(?:href|xlink:href)\s*=/i);
+  assert.match(svg, /#356351/i);
+});
