@@ -72,3 +72,30 @@ At `30b8519ae7cd0d527ab9b48fdb9bebbd7ac9ba71`, `node --check site/script.js` pas
 ## Public-release boundary
 
 GitHub Pages has not been enabled and no public URL has been accepted. Live-URL availability, HTTPS behavior, response headers, redirects, public console/network behavior, and final hosted-artifact confirmation remain pending a separate owner authorization and an actual deployment. This local implementation is prepared, not publicly released or production-verified.
+
+---
+
+## Portfolio-polish acceptance — 2026-08-02
+
+This addendum records local evidence for `codex/portfolio-polish` through candidate `fbde71d`. It covers only the approved hero, Synapse router, and June task-marker refinements. It does not represent a deployment or a test of the public GitHub Pages URL.
+
+### Browser evidence
+
+- Hero: the accessible heading reads “Injun Lee. I build AI systems around people.” and contains no “I am” prefix. The name uses the compact sans-serif signature treatment with a 42 by 2 px copper rule, while the thesis remains serif.
+- Responsive layout: at 1440, 820, 420, and 320 CSS pixels, the document client width equaled its scroll width and the hero name remained inside the viewport. The heading measured approximately 66.24, 73.6, 50.4, and 40 px respectively.
+- Synapse: the router renders with a clear `rgb(252, 251, 247)` surface, forest `rgb(53, 99, 81)` outline and label, and 1.4 px stroke. The selected route progressed from a 180 px dash offset to 0 px and revealed the answer.
+- June: all four task markers were transparent immediately after opening, with their empty outlines using the approved forest token for clear non-text contrast. During a fresh replay, completed-marker counts progressed monotonically from 0 to 1 to 2 to 3 to 4; closing and reopening reset the count to 0 before the sequence replayed.
+- Console: the controlled in-app Chromium browser reported no warnings or errors during the Synapse and June interaction checks.
+- Reduced motion: the automated contract verifies the final visible state under `prefers-reduced-motion: reduce`. The controlled browser did not expose native media-preference emulation, so no native reduced-motion claim is made here.
+
+### Automated evidence
+
+- `node --test tests/site.test.mjs`: 37 passing tests; 0 failures, skips, cancellations, or todo tests.
+- `node --check site/script.js`: passed.
+- `node --check tests/site.test.mjs`: passed.
+- `git diff --check origin/main...HEAD`: passed before this evidence-only update.
+- A tracked-source scan for provider-shaped credential literals reported `tracked_secret_matches=0`. No external runtime request, analytics, form, backend, or dependency was introduced.
+
+### Disposition
+
+The three requested polish changes are locally accepted for owner preview. The branch remains local and ahead of `origin/main`; it has not been pushed, merged, or deployed as part of this pass. Public-release gates and real-URL acceptance remain unchanged.

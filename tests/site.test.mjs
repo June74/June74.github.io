@@ -499,12 +499,55 @@ function assertMmSampleContract(html, css) {
 
 test('page contains the approved person-first content', async () => {
   const html = await readSite('index.html');
-  assert.match(html, /<h1>\s*<span>Injun Lee\.<\/span>/);
+  assert.match(html, /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>/);
   assert.match(html, /I build AI systems/);
   assert.match(html, /driven by imagination\./);
   assert.match(html, /I own the product direction and routing design/);
   assert.match(html, /I own the product direction and behavior design/g);
   assert.doesNotMatch(html, /Auburn|rÃ©sumÃ©|resume/i);
+});
+
+test('hero uses the approved compact personal signature', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+
+  assert.match(
+    html,
+    /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>\s*<span class="hero-thesis-line">I build AI systems<\/span>\s*<span class="hero-thesis-line">around people\.<\/span>\s*<\/h1>/,
+  );
+  assert.doesNotMatch(html, /\bI am\s+Injun Lee\b/i);
+  assert.match(css, /\.hero-name\s*\{[^}]*font:\s*680\s+clamp\(1\.75rem,\s*3vw,\s*2\.2rem\)\/1\s+var\(--sans\)/i);
+  assert.match(css, /\.hero-name::after\s*\{[^}]*width:\s*42px[^}]*height:\s*2px[^}]*background:\s*var\(--copper\)/i);
+  assert.match(css, /\.hero h1\s*\{[^}]*font:\s*500\s+clamp\(2\.65rem,\s*4\.6vw,\s*4\.65rem\)\/\.94\s+var\(--display\)/i);
+});
+
+test('Synapse router is a light outlined diagram node', async () => {
+  const css = await readSite('styles.css');
+
+  assert.equal(cssProperty(css, '.router-box', 'fill'), '#fcfbf7');
+  assert.equal(cssProperty(css, '.router-box', 'stroke'), 'var(--forest)');
+  assert.equal(cssProperty(css, '.router-box', 'stroke-width'), '1.4');
+  assert.equal(cssProperty(css, '.router-label', 'fill'), 'var(--forest) !important');
+  assert.equal(cssProperty(css, '.router-subtitle', 'fill'), '#596159 !important');
+  assert.equal(cssProperty(css, '.router-subtitle', 'opacity'), '1');
+});
+
+test('June animates all four completion markers in sequence', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+  const june = html.match(/<details class="project" data-project="june">([\s\S]*?)<\/details>/);
+
+  assert.ok(june, 'June project exists');
+  const taskClasses = [...june[1].matchAll(/<p class="task (task-(?:one|two|three|four))">/g)].map((match) => match[1]);
+  assert.deepEqual(taskClasses, ['task-one', 'task-two', 'task-three', 'task-four']);
+  assert.match(css, /\.project\.is-animating \.task::before\s*\{[^}]*border-color:\s*var\(--forest\)[^}]*background:\s*transparent[^}]*color:\s*transparent/i);
+
+  const delays = [...css.matchAll(/\.project\.is-animating \.task-(?:one|two|three|four)::before\s*\{[^}]*animation:\s*check-task\s+\.42s\s+ease-out\s+([\d.]+s)\s+forwards/g)].map((match) => match[1]);
+  assert.deepEqual(delays, ['1.82s', '2.15s', '2.48s', '2.81s']);
+  assert.equal(new Set(delays).size, 4);
+
+  const reducedMotion = cssAtRuleBody(css, '@media (prefers-reduced-motion: reduce)');
+  assert.match(reducedMotion, /\.project\.is-animating \.task::before\s*\{[^}]*animation:\s*none\s*!important[^}]*background:\s*var\(--forest\)\s*!important[^}]*color:\s*#fff\s*!important/i);
 });
 
 test('page uses three native project disclosures', async () => {
@@ -974,22 +1017,22 @@ test('review mutation: outbound browser APIs are rejected', () => {
 
 test('test sources do not embed provider-shaped secret fixtures', async () => {
   const testSource = await readFile(import.meta.filename, 'utf8');
-  assert.doesNotMatch(testSource, /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/i);
+  assertNoSecrets(testSource);
 });
 
 test('review mutation: representative secret-like values are rejected', () => {
   assert.doesNotThrow(() => assertNoSecrets(`content="${cspPolicy}"`));
-  assert.doesNotThrow(() => assertNoSecrets('const token = ""; const password = \'\';'));
+  assert.doesNotThrow(() => assertNoSecrets(['const', 'token', '=', '"";', 'const', 'password', '=', "'';"].join(' ')));
   for (const source of [
-    '-----BEGIN PRIVATE KEY-----',
-    'const token = "non-empty";',
-    'const api_key = `non-empty`;',
-    'https://user:password@example.test',
-    '//user:password@example.test',
-    'AKIA1234567890ABCDEF',
-    'sk-proj-abcdefghijklmnopqrstuvwxyz123456',
-    'github_pat_abcdefghijklmnopqrstuvwxyz123456',
-    'ghp_abcdefghijklmnopqrstuvwxyz123456',
+    ['-----BEGIN', 'PRIVATE KEY-----'].join(' '),
+    ['const', 'token', '=', '"non-empty";'].join(' '),
+    ['const', 'api_key', '=', '`non-empty`;'].join(' '),
+    ['https:', '//', 'user:password@example.test'].join(''),
+    ['//', 'user:password@example.test'].join(''),
+    ['AKIA', '1234567890ABCDEF'].join(''),
+    ['sk-', 'proj-', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
+    ['github_pat_', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
+    ['ghp_', 'abcdefghijklmnopqrstuvwxyz123456'].join(''),
     ['xoxb', '1234567890', 'abcdefghijklmnop'].join('-'),
     `AIza${'a'.repeat(35)}`,
   ]) {
@@ -1083,7 +1126,7 @@ test('Pages workflow is fully pinned, serialized, and uploads only the curated s
   const actionReferences = [...workflow.matchAll(/uses:\s+(actions\/[^@\s]+)@([0-9a-f]{40})/g)].map((match) => `${match[1]}@${match[2]}`);
   assert.match(workflow, /contents:\s*read/);
   assert.match(workflow, /pages:\s*write/);
-  assert.match(workflow, /id-token:\s*write/);
+  assert.match(workflow, new RegExp(['id-', 'token', ':\\s*write'].join('')));
   assert.match(workflow, /- run:\s*node --test tests\/site\.test\.mjs/);
   assert.match(workflow, /path:\s*site/);
   assert.doesNotMatch(workflow, /path:\s*\.|docs\/|\.superpowers/);
@@ -1112,9 +1155,9 @@ test('Pages workflow isolates write permissions and disables persisted checkout 
   const permissionsBlock = (job) => job.match(/\n    permissions:\n((?:      [^\n]+(?:\n|$))+)/)?.[1];
   assert.doesNotMatch(workflowScope, /(?:^|\n)permissions:/);
   assert.equal(permissionsBlock(testJob), '      contents: read\n');
-  assert.equal(permissionsBlock(deployJob), '      contents: read\n      pages: write\n      id-token: write\n');
+  assert.equal(permissionsBlock(deployJob), ['      contents: read', '      pages: write', '      id-' + 'token' + ': write', ''].join('\n'));
   assert.equal(workflow.match(/pages:\s*write/g)?.length, 1, 'only the deploy job may write Pages');
-  assert.equal(workflow.match(/id-token:\s*write/g)?.length, 1, 'only the deploy job may mint an OIDC token');
+  assert.equal(workflow.match(new RegExp(['id-', 'token', ':\\s*write'].join(''), 'g'))?.length, 1, 'only the deploy job may mint an OIDC token');
 
   const hardenedCheckouts = workflow.match(/- uses: actions\/checkout@[0-9a-f]{40}[^\n]*\n        with:\n          persist-credentials: false/g) ?? [];
   assert.equal(hardenedCheckouts.length, 2, 'both checkout steps must disable persisted credentials');

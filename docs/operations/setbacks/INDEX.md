@@ -4,9 +4,10 @@
 |---|---|---|---|
 | [SB-20260802-055457-pages-workflow-crlf-test](incidents/2026-08-02T055457Z-pages-workflow-crlf-test.md) | closed | 2026-08-02T05:54:57Z | Pages workflow test assumed LF line endings |
 | [SB-20260802-055458-setback-index-table-format](incidents/2026-08-02T055458Z-setback-index-table-format.md) | closed | 2026-08-02T05:54:58Z | Setback helper rejected the repository index table format |
+| [SB-20260802-062757-progress-ledger-parent-path](incidents/2026-08-02T062757Z-progress-ledger-parent-path.md) | closed | 2026-08-02T06:27:57Z | Progress ledger update targeted the parent workspace |
 | SB-2026-08-01-001 | closed | 2026-08-01 18:49 CDT | Skill root expanded incorrectly during discovery |
 | SB-2026-08-01-002 | closed | 2026-08-02 00:14 CDT | WinGet ripgrep shim could not execute |
-| SB-2026-08-01-003 | closed | 2026-08-01 21:19 CDT | Visual companion shell launcher unavailable on Windows |
+| SB-2026-08-01-003 | closed | 2026-08-02 01:20 CDT | Visual companion shell launcher unavailable on Windows |
 | SB-2026-08-01-004 | closed | 2026-08-01 21:21 CDT | Git cannot read user-level ignore file |
 | SB-2026-08-01-005 | contained | 2026-08-01 21:21 CDT | Direct GitHub Pages preflight returned cache miss |
 | SB-2026-08-01-006 | closed | 2026-08-01 21:28 CDT | Git identity diagnostic exposed a private email |
@@ -23,7 +24,7 @@
 | SB-2026-08-02-017 | contained | 2026-08-02 00:03 CDT | Browser runtime rejected networkidle wait mode |
 | SB-2026-08-02-018 | contained | 2026-08-02 00:08 CDT | Browser URL policy blocked an isolated native-control page |
 | SB-2026-08-02-019 | closed | 2026-08-02 00:20 CDT | Focused project summary did not activate by keyboard |
-| SB-2026-08-02-020 | closed | 2026-08-02 00:25 CDT | Acceptance harness assumptions delayed responsive and interaction checks |
+| SB-2026-08-02-020 | closed | 2026-08-02 01:51 CDT | Acceptance harness assumptions delayed responsive and interaction checks |
 | SB-2026-08-02-021 | closed | 2026-08-02 00:25 CDT | Whole-branch review package used an invalid PowerShell pathspec form |
 | SB-2026-08-02-022 | closed | 2026-08-02 00:26 CDT | Two developer tasks were briefly assigned the same test file |
-| SB-2026-08-02-023 | closed | 2026-08-02 00:57 CDT | GitHub push protection rejected a provider-shaped test fixture in branch history |
+| SB-2026-08-02-023 | closed | 2026-08-02 01:47 CDT | GitHub push protection rejected a provider-shaped test fixture in branch history |

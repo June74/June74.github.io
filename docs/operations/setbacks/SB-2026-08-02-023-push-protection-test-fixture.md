@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-02 00:48 CDT
-- Last observed: 2026-08-02 00:57 CDT
+- Last observed: 2026-08-02 01:47 CDT
 - Phase/task: Publish feature branch and open draft pull request
 - Environment: GitHub public repository `June74/June74.github.io`
 - Version/commit: original branch `feature/portfolio-implementation` at `0d545ee`
@@ -23,10 +23,18 @@ GitHub accepted the new repository's baseline `main` branch but rejected the fea
 
 The original feature branch is preserved locally. A new `codex/portfolio-implementation-pr` branch was created from the remote-backed `main`, and the verified feature tree was squash-merged into it. A source-level regression test now rejects provider-shaped Slack literals inside the test source itself, while the mutation fixture is assembled from separate pieces at runtime so the local scanner behavior remains covered.
 
+### Recurrence at 2026-08-02 01:40 CDT
+
+The portfolio-polish tracked-source scan found three other intentionally synthetic credential-shaped literals in `tests/site.test.mjs`: private-key, OpenAI-key, and GitHub-token categories. They are mutation fixtures, not real credentials, and none appear in the public `site/` artifact. The full scan correctly stopped integrated acceptance before the preview could be called complete.
+
+The existing prevention was too narrow because it rejected only Slack-shaped literals in the test source. The correction will generalize that source-level regression and assemble every provider-shaped mutation fixture from non-sensitive fragments at runtime.
+
 ## Verification
 
 The source-level regression first failed against the embedded literal as expected. The focused security and workflow selection passed 3/3, the full static suite passed 34/34, syntax and whitespace checks passed, and the committed provider-shaped scan found zero matches. GitHub accepted commit `b1e6625` on `codex/portfolio-implementation-pr` without a bypass.
 
+For the 2026-08-02 recurrence, the generalized source-level regression failed first against the embedded private-key fixture. After runtime assembly, the focused affected selection passed 4/4, the full suite passed 37/37, and an independent tracked-source scan reported zero provider-shaped literal matches. Security review approved commit `59f3d30` with no findings and confirmed the detector set and mutation values remain equivalent.
+
 ## Next diagnostic step
 
-None. Preserve the original local feature branch only as historical evidence and publish from the protected clean branch.
+None. Keep all future credential-shaped mutation inputs assembled at runtime and retain the generalized source-level regression.
