@@ -1,8 +1,8 @@
 # SB-2026-08-02-021: Whole-branch review package used an invalid PowerShell pathspec form
 
 - Status: closed
-- First observed: 2026-08-02 00:57 CDT
-- Last observed: 2026-08-02 00:58 CDT
+- First observed: 2026-08-02 00:24 CDT
+- Last observed: 2026-08-02 00:25 CDT
 - Phase/task: Task 6 final integrated review
 - Environment: Windows PowerShell and Git
 - Version/commit: `12fd68c`

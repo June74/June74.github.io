@@ -20,6 +20,7 @@
 | SB-2026-08-01-016 | closed | 2026-08-02 00:00 CDT | Listener query was denied during local acceptance setup |
 | SB-2026-08-02-017 | contained | 2026-08-02 00:03 CDT | Browser runtime rejected networkidle wait mode |
 | SB-2026-08-02-018 | contained | 2026-08-02 00:08 CDT | Browser URL policy blocked an isolated native-control page |
-| SB-2026-08-02-019 | closed | 2026-08-02 00:54 CDT | Focused project summary did not activate by keyboard |
+| SB-2026-08-02-019 | closed | 2026-08-02 00:20 CDT | Focused project summary did not activate by keyboard |
 | SB-2026-08-02-020 | closed | 2026-08-02 00:25 CDT | Acceptance harness assumptions delayed responsive and interaction checks |
-| SB-2026-08-02-021 | closed | 2026-08-02 00:58 CDT | Whole-branch review package used an invalid PowerShell pathspec form |
+| SB-2026-08-02-021 | closed | 2026-08-02 00:25 CDT | Whole-branch review package used an invalid PowerShell pathspec form |
+| SB-2026-08-02-022 | closed | 2026-08-02 00:26 CDT | Two developer tasks were briefly assigned the same test file |
