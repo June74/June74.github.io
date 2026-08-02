@@ -1,8 +1,8 @@
 # SB-2026-08-01-011: Favicon namespace conflicts with planned URL test
 
-- Status: contained
+- Status: closed
 - First observed: 2026-08-01 21:59 CDT
-- Last observed: 2026-08-01 21:59 CDT
+- Last observed: 2026-08-01 22:12 CDT
 - Phase/task: implementation Task 2 visual system
 - Environment: Node built-in test runner on Windows
 - Version/commit: task base `0dff9ba`
@@ -29,8 +29,8 @@ Owner decision is required because the plan mandates both conflicting conditions
 
 ## Verification
 
-Pending owner decision, amended focused test, full-suite GREEN, and independent Task 2 review.
+The owner selected Option A. The test now permits only the exact standard namespace and applies the full security scan to all remaining SVG text. A focused favicon check passed, the full suite reported 8 passing tests, and independent Task 2 review approved the namespace control with no remaining findings.
 
 ## Next diagnostic step
 
-After the owner selects the governing rule, update the brief's implementation interpretation, complete the test-first cycle, and verify the favicon contains no fetch-capable external reference.
+None. Preserve the exact namespace-only exception if the favicon changes.
