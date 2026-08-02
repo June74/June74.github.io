@@ -84,8 +84,19 @@ function attributeValues(tag, name) {
   return tag.attributes.filter((attribute) => attribute.name === name).map((attribute) => attribute.value);
 }
 
+function decodedAttributeValues(tag, name) {
+  return attributeValues(tag, name).map((value) => typeof value === 'string' ? decodeTextEntities(value) : value);
+}
+
 function singleAttribute(tag, name) {
   const values = attributeValues(tag, name);
+  assert.equal(values.length, 1, `<${tag.name}> must have exactly one ${name} attribute`);
+  assert.notEqual(values[0], null, `<${tag.name}> ${name} must have a value`);
+  return values[0];
+}
+
+function singleDecodedAttribute(tag, name) {
+  const values = decodedAttributeValues(tag, name);
   assert.equal(values.length, 1, `<${tag.name}> must have exactly one ${name} attribute`);
   assert.notEqual(values[0], null, `<${tag.name}> ${name} must have a value`);
   return values[0];
@@ -202,12 +213,12 @@ function assertApprovedUrls(html) {
 }
 
 function assertApprovedOutboundAnchors(html) {
-  const outboundAnchors = parseStartTags(html).filter((tag) => tag.name === 'a' && attributeValues(tag, 'href').includes('https://github.com/June74'));
+  const outboundAnchors = parseStartTags(html).filter((tag) => tag.name === 'a' && decodedAttributeValues(tag, 'href').includes('https://github.com/June74'));
   assert.equal(outboundAnchors.length, 2);
   for (const anchor of outboundAnchors) {
-    assert.equal(singleAttribute(anchor, 'href'), 'https://github.com/June74');
-    assert.equal(singleAttribute(anchor, 'target'), '_blank');
-    assert.deepEqual(new Set(singleAttribute(anchor, 'rel').split(/\s+/)), new Set(['noopener', 'noreferrer']));
+    assert.equal(singleDecodedAttribute(anchor, 'href'), 'https://github.com/June74');
+    assert.equal(singleDecodedAttribute(anchor, 'target'), '_blank');
+    assert.deepEqual(new Set(singleDecodedAttribute(anchor, 'rel').split(/\s+/)), new Set(['noopener', 'noreferrer']));
   }
 }
 
@@ -748,4 +759,30 @@ test('re-review mutation: draft comments are rejected in every public source typ
   assert.throws(() => assertNoDraftComments('script.js', '// FIXME: replace behavior'));
   assert.throws(() => assertNoDraftComments('script.js', '/* draft implementation */'));
   assert.throws(() => assertNoDraftComments('assets/favicon.svg', '<!-- TODO: replace icon --><svg></svg>'));
+});
+
+test('final review mutation: encoded GitHub anchors cannot evade count or protections', async () => {
+  const html = await readSite('index.html');
+  assert.doesNotThrow(() => assertApprovedOutboundAnchors(html));
+
+  const encodedExisting = html.replace('https://github.com/June74', 'https&#58;//github.com/June74');
+  assert.doesNotThrow(() => assertApprovedUrls(encodedExisting));
+  assert.doesNotThrow(() => assertApprovedOutboundAnchors(encodedExisting));
+
+  const encodedUnprotectedExisting = html.replace(
+    'href="https://github.com/June74" target="_blank" rel="noopener noreferrer"',
+    'href="https&#58;//github.com/June74"',
+  );
+  assert.doesNotThrow(() => assertApprovedUrls(encodedUnprotectedExisting));
+  assert.throws(() => assertApprovedOutboundAnchors(encodedUnprotectedExisting));
+
+  const encodedThird = html.replace('</nav>', '<a href="https&#58;//github.com/June74">Unprotected</a></nav>');
+  assert.doesNotThrow(() => assertApprovedUrls(encodedThird));
+  assert.throws(() => assertApprovedOutboundAnchors(encodedThird));
+
+  const protectedThird = html.replace('</nav>', '<a href="https&#x3a;//github.com/June74" target="_blank" rel="noopener noreferrer">Duplicate</a></nav>');
+  assert.throws(() => assertApprovedOutboundAnchors(protectedThird));
+
+  const duplicateHref = html.replace('href="https://github.com/June74"', 'href="https://github.com/June74" href="https&#58;//github.com/June74"');
+  assert.throws(() => assertApprovedOutboundAnchors(duplicateHref));
 });
