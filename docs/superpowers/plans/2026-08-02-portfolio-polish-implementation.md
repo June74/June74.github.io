@@ -252,15 +252,50 @@ git commit -m "sequence all June task completions"
 
 ---
 
-## Integrated acceptance after all tasks
+### Task 4: Integrated acceptance and preview handoff
 
-- [ ] Run `node --check site/script.js` and `node --check tests/site.test.mjs`.
-- [ ] Run `node --test tests/site.test.mjs` and confirm every test passes.
-- [ ] Run `git diff --check origin/main...HEAD`.
-- [ ] Scan tracked source for secrets, unapproved URLs, remote assets, and draft markers using the existing static test suite and repository scan.
-- [ ] Reload `http://127.0.0.1:8000/` in the in-app browser.
-- [ ] Verify the hero at 1440 px, 820 px, 420 px, and 320 px widths without horizontal overflow.
-- [ ] Open Synapse and confirm its router is light and outlined while route drawing still completes.
-- [ ] Open June and confirm all four markers begin empty, complete one-by-one, and replay after close/reopen.
-- [ ] Verify reduced-motion final state and zero browser console errors.
-- [ ] Dispatch a whole-branch product/security/code review against the merge base and resolve every Critical or Important finding before presenting the preview.
+**Files:**
+- Modify: `docs/release/local-acceptance.md`
+
+**Interfaces:**
+- Consumes: the committed outputs and test evidence from Tasks 1–3.
+- Produces: durable local acceptance evidence for this revision and the verified in-app browser preview shown to the owner.
+
+- [ ] **Step 1: Run complete automated verification**
+
+```powershell
+node --check site/script.js
+node --check tests/site.test.mjs
+node --test tests/site.test.mjs
+git diff --check origin/main...HEAD
+```
+
+Expected: both syntax checks pass, every automated test passes, and the whole branch diff has no whitespace errors.
+
+- [ ] **Step 2: Run the tracked-source security boundary scan**
+
+Use the existing test suite plus a tracked-file scan to confirm zero provider-shaped secrets, unapproved remote URLs, draft markers, remote assets, or new dependencies. Expected: zero findings.
+
+- [ ] **Step 3: Exercise the real browser behaviors**
+
+Reload `http://127.0.0.1:8000/` in the in-app browser, then:
+
+- inspect the hero at 1440 px, 820 px, 420 px, and 320 px without horizontal overflow;
+- open Synapse and confirm its router is light and outlined while route drawing still completes;
+- open June and confirm all four markers begin empty, complete one-by-one, and replay after close/reopen;
+- verify the reduced-motion final state and zero browser console errors.
+
+- [ ] **Step 4: Record the revision evidence**
+
+Append a dated portfolio-polish section to `docs/release/local-acceptance.md` containing the exact branch/commit, automated counts, viewport results, Synapse/June behavior results, reduced-motion result, console result, and the boundary that this local revision is not deployed until a later push/merge.
+
+- [ ] **Step 5: Dispatch whole-branch review and resolve findings**
+
+Dispatch product/security/code review against `git merge-base origin/main HEAD`. Resolve every Critical or Important finding and rerun its covering checks before presenting the preview.
+
+- [ ] **Step 6: Commit Task 4**
+
+```powershell
+git add docs/release/local-acceptance.md
+git commit -m "record portfolio polish acceptance"
+```
