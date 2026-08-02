@@ -99,3 +99,34 @@ This addendum records local evidence for `codex/portfolio-polish` through candid
 ### Disposition
 
 The three requested polish changes are locally accepted for owner preview. The branch remains local and ahead of `origin/main`; it has not been pushed, merged, or deployed as part of this pass. Public-release gates and real-URL acceptance remain unchanged.
+
+---
+
+## Synapse node-tint acceptance — 2026-08-02
+
+This addendum records local browser evidence for implementation commit `a7433cd` on `codex/synapse-node-tints`. It covers only the owner-approved Prompt and Router surface treatments. It is local-preview evidence, not a public deployment.
+
+### Automated evidence
+
+- The focused `Synapse entry nodes reuse the selected and answer treatments` contract passed.
+- `node --test tests/site.test.mjs`: 37 passing tests with zero failures.
+- `node --check site/script.js` and `node --check tests/site.test.mjs`: passed.
+- `git diff --check`: passed; Git emitted only the repository's expected LF-to-CRLF working-tree notices.
+
+### Browser evidence
+
+- At 1280 by 720 CSS pixels, Prompt rendered with `rgb(240, 222, 211)` fill, `rgb(184, 111, 75)` stroke, and `1.6px` stroke width.
+- At the same viewport, Router rendered with `rgb(228, 236, 231)` fill, `rgb(53, 99, 81)` stroke, and `1.4px` stroke width.
+- The selected route completed at a `0px` dash offset and the answer copy reached opacity `1`, confirming that the existing routing animation still completes.
+- At 390 by 844 and 1440 by 900 CSS pixels, the document client width equaled its scroll width and both tinted nodes remained fully inside the SVG viewport.
+- The browser console reported zero warnings or errors during the interaction check.
+
+### Review disposition
+
+- Independent task review found no Critical or Important issues and approved the implementation/test quality.
+- The only Minor observation was a stale pre-commit sentence in the implementer handoff; the handoff was corrected after the primary agent completed commit `a7433cd`.
+- No dependency, asset, request, token, script behavior, public information, or external-service boundary changed.
+
+### Disposition
+
+The real implementation is locally accepted for owner visual review. It has not been pushed, merged, or deployed in this pass; public release still requires the owner's approval of the implemented preview.
