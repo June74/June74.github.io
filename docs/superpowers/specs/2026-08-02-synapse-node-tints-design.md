@@ -1,6 +1,6 @@
 # Synapse prompt and router tint design
 
-- Status: approved visual direction; awaiting written-spec review
+- Status: approved by owner after visual comparison on 2026-08-02
 - Owner: Injun Lee
 - Date: 2026-08-02
 - Affected surface: Synapse diagram only
