@@ -502,8 +502,15 @@ test('page contains the approved person-first content', async () => {
   assert.match(html, /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>/);
   assert.match(html, /I build AI systems/);
   assert.match(html, /driven by imagination\./);
-  assert.match(html, /I own the product direction and routing design/);
-  assert.match(html, /I own the product direction and behavior design/g);
+  const productDescriptions = [
+    'An AI routing system that analyzes each prompt and matches it with a suitable model.',
+    'An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.',
+    'A personal finance tracker that turns spending patterns into clear insights and practical suggestions.',
+  ];
+  for (const description of productDescriptions) {
+    assert.equal(html.split(description).length - 1, 1, `${description} appears exactly once`);
+  }
+  assert.doesNotMatch(html, /I own the product direction/i);
   assert.doesNotMatch(html, /Auburn|rÃ©sumÃ©|resume/i);
 });
 
