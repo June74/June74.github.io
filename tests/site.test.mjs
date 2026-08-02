@@ -391,6 +391,62 @@ async function listFiles(directory, prefix = '') {
   return files.sort();
 }
 
+function assertMmSampleContract(html, css) {
+  const approvedSpending = [20, 35, 25, 90, 45, 55, 30];
+  const approvedWeekdays = [['M', 28], ['T', 68], ['W', 108], ['T', 148], ['F', 188], ['S', 228], ['S', 271]];
+  const figure = html.match(/<figure class="project-visual mm-visual"[\s\S]*?<\/figure>/);
+  assert.ok(figure, 'MM figure is present');
+
+  const dailyValues = figure[0].match(/<svg class="spending-chart" data-daily-spending="([\d ]+)"/);
+  assert.ok(dailyValues, 'MM chart declares its seven daily spending values');
+  const spending = dailyValues[1].trim().split(/\s+/).map(Number);
+  assert.deepEqual(spending, approvedSpending, 'MM chart keeps the approved daily spending sequence');
+
+  const weeklyTotal = figure[0].match(/This week · \$(\d+)/);
+  const budget = figure[0].match(/Weekly plan: \$(\d+) · spent: \$(\d+)[\s\S]*?<strong>\$(\d+) remaining<\/strong>/);
+  assert.ok(weeklyTotal, 'MM chart displays a weekly total');
+  assert.ok(budget, 'MM chart displays plan, spent, and remaining amounts');
+  const planned = Number(budget[1]);
+  const spent = Number(budget[2]);
+  const remaining = Number(budget[3]);
+  const displayedTotal = Number(weeklyTotal[1]);
+  assert.deepEqual([planned, displayedTotal, spent, remaining], [500, 300, 300, 200]);
+  assert.equal(spending.reduce((total, value) => total + value, 0), spent);
+  assert.equal(planned - spent, remaining);
+
+  const weekdayLabels = [...figure[0].matchAll(/<text x="([\d.]+)" y="120">([MTWFS])<\/text>/g)]
+    .map((match) => [match[2], Number(match[1])]);
+  assert.deepEqual(weekdayLabels, approvedWeekdays, 'MM chart keeps the approved weekday positions');
+
+  const path = figure[0].match(/<path class="spending-path" d="([^"]+)"/);
+  assert.ok(path, 'MM chart has a spending path');
+  const coordinates = [...path[1].matchAll(/[ML]\s*([\d.]+)\s+([\d.]+)/g)]
+    .map((match) => [Number(match[1]), Number(match[2])]);
+  assert.equal(coordinates.length, 7, 'MM chart has one path coordinate per day');
+  assert.deepEqual(coordinates.map(([x]) => x), approvedWeekdays.map(([, x]) => x + 3));
+  coordinates.forEach(([, y], index) => {
+    const expectedY = 96 - spending[index] * 76 / 120;
+    assert.ok(Math.abs(y - expectedY) <= 0.01, `MM day ${index + 1} y-coordinate matches $${spending[index]}`);
+  });
+
+  const highlightedPoints = [...figure[0].matchAll(/<circle class="chart-point" cx="([\d.]+)" cy="([\d.]+)" r="4"\/>/g)];
+  assert.equal(highlightedPoints.length, 1, 'MM chart has one highlighted point');
+  const highlightedPoint = highlightedPoints[0];
+  assert.equal(approvedWeekdays[3][0], 'T');
+  assert.equal(spending[3], 90);
+  assert.deepEqual(highlightedPoint.slice(1).map(Number), [151, 39], 'Thursday $90 is highlighted at (151, 39)');
+  assert.deepEqual(coordinates[3], [151, 39], 'highlight matches the Thursday path coordinate');
+
+  const expectedFill = spent / planned * 100;
+  const baseFill = css.match(/(?:^|\n)\.budget-fill\s*\{[^}]*width:\s*([\d.]+)%/);
+  const animatedFill = css.match(/@keyframes\s+fill-budget\s*\{\s*to\s*\{[^}]*width:\s*([\d.]+)%/);
+  const reducedMotionFill = css.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.budget-fill\s*\{[^}]*width:\s*([\d.]+)%\s*!important/);
+  assert.ok(baseFill, 'MM budget has a final base width');
+  assert.ok(animatedFill, 'MM budget animation has a final width');
+  assert.ok(reducedMotionFill, 'MM reduced-motion budget has a final width');
+  for (const match of [baseFill, animatedFill, reducedMotionFill]) assert.equal(Number(match[1]), expectedFill);
+}
+
 test('page contains the approved person-first content', async () => {
   const html = await readSite('index.html');
   assert.match(html, /<h1>\s*<span>Injun Lee\.<\/span>/);
@@ -428,23 +484,34 @@ test('June and MM figures expose substantive descriptions through their captions
 
 test('MM sample spending values reconcile with the weekly budget', async () => {
   const html = await readSite('index.html');
-  const figure = html.match(/<figure class="project-visual mm-visual"[\s\S]*?<\/figure>/);
-  assert.ok(figure, 'MM figure is present');
+  const css = await readSite('styles.css');
+  assertMmSampleContract(html, css);
+});
 
-  const dailyValues = figure[0].match(/<svg class="spending-chart" data-daily-spending="([\d ]+)"/);
-  assert.ok(dailyValues, 'MM chart declares its seven daily spending values');
-  const spending = dailyValues[1].trim().split(/\s+/).map(Number);
-  assert.equal(spending.length, 7, 'MM chart has one spending value for each day');
+test('review mutation: MM contract rejects coordinated number and geometry drift', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+  assert.doesNotThrow(() => assertMmSampleContract(html, css));
 
-  const weeklyTotal = figure[0].match(/This week · \$(\d+)/);
-  const budget = figure[0].match(/Weekly plan: \$(\d+) · spent: \$(\d+)[\s\S]*?<strong>\$(\d+) remaining<\/strong>/);
-  assert.ok(weeklyTotal, 'MM chart displays a weekly total');
-  assert.ok(budget, 'MM chart displays plan, spent, and remaining amounts');
-
-  const [, planned, spent, remaining] = budget.map(Number);
-  assert.equal(spending.reduce((total, value) => total + value, 0), spent);
-  assert.equal(Number(weeklyTotal[1]), spent);
-  assert.equal(planned - spent, remaining);
+  const coordinatedDrift = html
+    .replace('20 35 25 90 45 55 30', '30 35 25 90 45 55 30')
+    .replace('This week · $300', 'This week · $310')
+    .replace('spent: $300', 'spent: $310')
+    .replace('$200 remaining', '$190 remaining');
+  const mutations = [
+    [coordinatedDrift, css],
+    [html.replace('Weekly plan: $500', 'Weekly plan: $501'), css],
+    [html.replace('<text x="28" y="120">M</text>', '<text x="29" y="120">M</text>'), css],
+    [html.replace('M31 83.33', 'M31 82.33'), css],
+    [html.replace('M31 83.33', 'M32 83.33'), css],
+    [html.replace('cx="151" cy="39"', 'cx="151" cy="40"'), css],
+    [html, css.replace('.budget-fill { display: block; width: 60%;', '.budget-fill { display: block; width: 61%;')],
+    [html, css.replace('@keyframes fill-budget { to { width: 60%; } }', '@keyframes fill-budget { to { width: 61%; } }')],
+    [html, css.replace('.budget-fill { width: 60% !important; }', '.budget-fill { width: 61% !important; }')],
+  ];
+  for (const [mutatedHtml, mutatedCss] of mutations) {
+    assert.throws(() => assertMmSampleContract(mutatedHtml, mutatedCss));
+  }
 });
 
 test('only approved outbound links are present', async () => {
