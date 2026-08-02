@@ -532,6 +532,24 @@ test('Synapse router is a light outlined diagram node', async () => {
   assert.equal(cssProperty(css, '.router-subtitle', 'opacity'), '1');
 });
 
+test('June animates all four completion markers in sequence', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+  const june = html.match(/<details class="project" data-project="june">([\s\S]*?)<\/details>/);
+
+  assert.ok(june, 'June project exists');
+  const taskClasses = [...june[1].matchAll(/<p class="task (task-(?:one|two|three|four))">/g)].map((match) => match[1]);
+  assert.deepEqual(taskClasses, ['task-one', 'task-two', 'task-three', 'task-four']);
+  assert.match(css, /\.project\.is-animating \.task::before\s*\{[^}]*background:\s*transparent[^}]*color:\s*transparent/i);
+
+  const delays = [...css.matchAll(/\.project\.is-animating \.task-(?:one|two|three|four)::before\s*\{[^}]*animation:\s*check-task\s+\.42s\s+ease-out\s+([\d.]+s)\s+forwards/g)].map((match) => match[1]);
+  assert.deepEqual(delays, ['1.82s', '2.15s', '2.48s', '2.81s']);
+  assert.equal(new Set(delays).size, 4);
+
+  const reducedMotion = cssAtRuleBody(css, '@media (prefers-reduced-motion: reduce)');
+  assert.match(reducedMotion, /\.project\.is-animating \.task::before\s*\{[^}]*animation:\s*none\s*!important[^}]*background:\s*var\(--forest\)\s*!important[^}]*color:\s*#fff\s*!important/i);
+});
+
 test('page uses three native project disclosures', async () => {
   const html = await readSite('index.html');
   const projects = html.match(/<details class="project" data-project="(synapse|june|mm)">/g) ?? [];
