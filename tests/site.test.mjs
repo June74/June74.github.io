@@ -312,6 +312,56 @@ function assertApprovedColors(css) {
   }
 }
 
+function cssDeclarationsFor(css, selector) {
+  for (const match of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const selectors = match[1].split(',').map((candidate) => candidate.trim());
+    if (selectors.includes(selector)) return match[2];
+  }
+  assert.fail(`missing CSS selector: ${selector}`);
+}
+
+function cssProperty(css, selector, property) {
+  const declarations = cssDeclarationsFor(css, selector);
+  const match = declarations.match(new RegExp(`(?:^|;)\\s*${property.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}\\s*:\\s*([^;]+)`, 'i'));
+  assert.ok(match, `${selector} must declare ${property}`);
+  return match[1].trim().toLowerCase();
+}
+
+function cssAtRuleBody(css, marker) {
+  const markerIndex = css.indexOf(marker);
+  assert.ok(markerIndex >= 0, `missing CSS at-rule: ${marker}`);
+  const opening = css.indexOf('{', markerIndex + marker.length);
+  assert.ok(opening >= 0, `${marker} must have a block`);
+  let depth = 1;
+  for (let index = opening + 1; index < css.length; index += 1) {
+    if (css[index] === '{') depth += 1;
+    if (css[index] === '}') depth -= 1;
+    if (depth === 0) return css.slice(opening + 1, index);
+  }
+  assert.fail(`unterminated CSS at-rule: ${marker}`);
+}
+
+function resolveCssColor(value) {
+  const variable = value.match(/^var\(--([a-z0-9_-]+)\)$/i);
+  const resolved = variable ? approvedColorProperties.get(variable[1].toLowerCase()) : value;
+  assert.match(resolved ?? '', /^#[0-9a-f]{6}$/i, `unsupported test color: ${value}`);
+  return resolved;
+}
+
+function relativeLuminance(hex) {
+  const channels = hex.slice(1).match(/.{2}/g).map((channel) => Number.parseInt(channel, 16) / 255);
+  const linear = channels.map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+  return (0.2126 * linear[0]) + (0.7152 * linear[1]) + (0.0722 * linear[2]);
+}
+
+function contrastRatio(foreground, background) {
+  const foregroundLuminance = relativeLuminance(resolveCssColor(foreground));
+  const backgroundLuminance = relativeLuminance(resolveCssColor(background));
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function decodeTextEntities(source) {
   const named = { amp: '&', apos: "'", colon: ':', equals: '=', gt: '>', lt: '<', newline: '\n', nbsp: ' ', num: '#', period: '.', quest: '?', quot: '"', sol: '/', tab: '\t' };
   return source
@@ -528,6 +578,46 @@ test('visual system uses only the approved accent tokens', async () => {
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /@media\s*\(max-width:\s*820px\)/);
   assert.match(css, /@media\s*\(max-width:\s*420px\)/);
+});
+
+test('diagram secondary captions meet normal-text contrast on their actual light surfaces', async () => {
+  const css = await readSite('styles.css');
+  const checks = [
+    ['.project-visual figcaption span:last-child', '.project[open]'],
+    ['.schedule-grid > span:not(.time):not(.slot)', '.calendar-card'],
+    ['.time', '.calendar-card'],
+    ['.spending-chart text', '.chart-card'],
+  ];
+
+  for (const [foregroundSelector, backgroundSelector] of checks) {
+    const foreground = cssProperty(css, foregroundSelector, foregroundSelector.includes('text') ? 'fill' : 'color');
+    const background = cssProperty(css, backgroundSelector, 'background');
+    assert.match(foreground, /^var\(--(?:forest|ink)\)$/, `${foregroundSelector} must use an existing high-contrast palette token`);
+    const ratio = contrastRatio(foreground, background);
+    assert.ok(ratio >= 4.5, `${foregroundSelector} contrast is ${ratio.toFixed(2)}:1; expected at least 4.5:1`);
+  }
+});
+
+test('compact topics rule targets the rendered topic chips', async () => {
+  const css = await readSite('styles.css');
+  const compactRules = cssAtRuleBody(css, '@media (max-width: 420px)');
+  assert.match(compactRules, /\.topics\s*>\s*span\s*\{[^}]*font-size:\s*\.58rem/i);
+  assert.doesNotMatch(compactRules, /\.topic\s*\{/i);
+});
+
+test('fine pointers receive restrained palette hover affordances on all primary links', async () => {
+  const css = await readSite('styles.css');
+  const fineHoverRules = cssAtRuleBody(css, '@media (hover: hover) and (pointer: fine)');
+  const expectedColors = new Map([
+    ['.site-nav a:hover', 'var(--forest)'],
+    ['.hero-jump:hover', 'var(--forest)'],
+    ['.site-footer > a:hover', 'var(--copper)'],
+  ]);
+
+  for (const [selector, expectedColor] of expectedColors) {
+    assert.equal(cssProperty(fineHoverRules, selector, 'color'), expectedColor);
+  }
+  assert.match(css, /:focus-visible\s*\{[^}]*outline:/i, 'hover styling must retain the visible keyboard focus treatment');
 });
 
 test('mobile layout targets the real project and footer structures', async () => {
