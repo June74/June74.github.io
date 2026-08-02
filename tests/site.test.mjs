@@ -26,6 +26,22 @@ test('page uses three native project disclosures', async () => {
   assert.match(html, /href="#current-work"/);
 });
 
+test('June and MM figures expose substantive descriptions through their captions', async () => {
+  const html = await readSite('index.html');
+  const figures = [
+    ['june', 'june-caption', 'An illustrative weekly calendar pairs planned events with follow-through tasks.'],
+    ['mm', 'mm-caption', 'A sample spending chart pairs the weekly budget with practical suggestions.'],
+  ];
+
+  for (const [project, captionId, description] of figures) {
+    const figure = html.match(new RegExp(`<figure class="project-visual ${project}-visual" aria-labelledby="${captionId}">([\\s\\S]*?)<\\/figure>`));
+    assert.ok(figure, `${project} figure is labeled by its caption`);
+    const caption = figure[1].match(new RegExp(`<figcaption id="${captionId}">([\\s\\S]*?)<\\/figcaption>`));
+    assert.ok(caption, `${project} caption is inside its labeled figure`);
+    assert.ok(caption[1].includes(description), `${project} caption includes a substantive description`);
+  }
+});
+
 test('only approved outbound links are present', async () => {
   const html = await readSite('index.html');
   const externalLinks = [...html.matchAll(/<a\b[^>]*href="(https:[^"]+)"[^>]*>/g)];
