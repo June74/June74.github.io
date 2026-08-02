@@ -9,3 +9,4 @@
 | SB-2026-08-01-005 | contained | 2026-08-01 21:21 CDT | Direct GitHub Pages preflight returned cache miss |
 | SB-2026-08-01-006 | closed | 2026-08-01 21:28 CDT | Git identity diagnostic exposed a private email |
 | SB-2026-08-01-007 | closed | 2026-08-01 21:30 CDT | Staged design baseline failed whitespace validation |
+| SB-2026-08-01-008 | closed | 2026-08-01 21:46 CDT | Worktree creation blocked by Git ownership check |
