@@ -118,7 +118,7 @@ a { color: inherit; }
 @keyframes event-in { to { opacity: 1; transform: scaleX(1); } }
 .task { display: grid; grid-template-columns: 16px 1fr; gap: 7px; align-items: center; margin: 9px 0; color: #596159; font-size: .62rem; }
 .task::before { content: '✓'; display: grid; place-items: center; width: 14px; height: 14px; border: 1px solid var(--forest); border-radius: 50%; background: var(--forest); color: #fff; }
-.project.is-animating .task::before { border-color: #9ba59e; background: transparent; color: transparent; }
+.project.is-animating .task::before { border-color: var(--forest); background: transparent; color: transparent; }
 .project.is-animating .task-one::before { animation: check-task .42s ease-out 1.82s forwards; }
 .project.is-animating .task-two::before { animation: check-task .42s ease-out 2.15s forwards; }
 .project.is-animating .task-three::before { animation: check-task .42s ease-out 2.48s forwards; }

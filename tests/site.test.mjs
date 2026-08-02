@@ -540,7 +540,7 @@ test('June animates all four completion markers in sequence', async () => {
   assert.ok(june, 'June project exists');
   const taskClasses = [...june[1].matchAll(/<p class="task (task-(?:one|two|three|four))">/g)].map((match) => match[1]);
   assert.deepEqual(taskClasses, ['task-one', 'task-two', 'task-three', 'task-four']);
-  assert.match(css, /\.project\.is-animating \.task::before\s*\{[^}]*background:\s*transparent[^}]*color:\s*transparent/i);
+  assert.match(css, /\.project\.is-animating \.task::before\s*\{[^}]*border-color:\s*var\(--forest\)[^}]*background:\s*transparent[^}]*color:\s*transparent/i);
 
   const delays = [...css.matchAll(/\.project\.is-animating \.task-(?:one|two|three|four)::before\s*\{[^}]*animation:\s*check-task\s+\.42s\s+ease-out\s+([\d.]+s)\s+forwards/g)].map((match) => match[1]);
   assert.deepEqual(delays, ['1.82s', '2.15s', '2.48s', '2.81s']);
