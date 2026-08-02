@@ -7,7 +7,7 @@
 | [SB-20260802-062757-progress-ledger-parent-path](incidents/2026-08-02T062757Z-progress-ledger-parent-path.md) | closed | 2026-08-02T06:27:57Z | Progress ledger update targeted the parent workspace |
 | SB-2026-08-01-001 | closed | 2026-08-01 18:49 CDT | Skill root expanded incorrectly during discovery |
 | SB-2026-08-01-002 | closed | 2026-08-02 00:14 CDT | WinGet ripgrep shim could not execute |
-| SB-2026-08-01-003 | closed | 2026-08-02 01:20 CDT | Visual companion shell launcher unavailable on Windows |
+| SB-2026-08-01-003 | closed | 2026-08-02 12:49 CDT | Visual companion shell launcher unavailable on Windows |
 | SB-2026-08-01-004 | closed | 2026-08-01 21:21 CDT | Git cannot read user-level ignore file |
 | SB-2026-08-01-005 | contained | 2026-08-01 21:21 CDT | Direct GitHub Pages preflight returned cache miss |
 | SB-2026-08-01-006 | closed | 2026-08-01 21:28 CDT | Git identity diagnostic exposed a private email |

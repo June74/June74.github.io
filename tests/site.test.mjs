@@ -521,15 +521,34 @@ test('hero uses the approved compact personal signature', async () => {
   assert.match(css, /\.hero h1\s*\{[^}]*font:\s*500\s+clamp\(2\.65rem,\s*4\.6vw,\s*4\.65rem\)\/\.94\s+var\(--display\)/i);
 });
 
-test('Synapse router is a light outlined diagram node', async () => {
+test('Synapse entry nodes reuse the selected and answer treatments', async () => {
+  const html = await readSite('index.html');
   const css = await readSite('styles.css');
 
-  assert.equal(cssProperty(css, '.router-box', 'fill'), '#fcfbf7');
+  assert.match(html, /<rect class="diagram-box prompt-box" x="18" y="82" width="112" height="56" rx="9"\/>/);
+
+  assert.equal(cssProperty(css, '.prompt-box', 'fill'), '#f0ded3');
+  assert.equal(cssProperty(css, '.prompt-box', 'stroke'), 'var(--copper)');
+  assert.equal(cssProperty(css, '.prompt-box', 'stroke-width'), '1.6');
+  assert.equal(cssProperty(css, '.prompt-box', 'fill'), cssProperty(css, '.model-selected', 'fill'));
+  assert.equal(cssProperty(css, '.prompt-box', 'stroke'), cssProperty(css, '.model-selected', 'stroke'));
+  assert.equal(cssProperty(css, '.prompt-box', 'stroke-width'), cssProperty(css, '.model-selected', 'stroke-width'));
+
+  assert.equal(cssProperty(css, '.router-box', 'fill'), '#e4ece7');
   assert.equal(cssProperty(css, '.router-box', 'stroke'), 'var(--forest)');
   assert.equal(cssProperty(css, '.router-box', 'stroke-width'), '1.4');
+  assert.equal(cssProperty(css, '.router-box', 'fill'), cssProperty(css, '.answer-box', 'fill'));
+  assert.equal(cssProperty(css, '.router-box', 'stroke'), cssProperty(css, '.answer-box', 'stroke'));
   assert.equal(cssProperty(css, '.router-label', 'fill'), 'var(--forest) !important');
   assert.equal(cssProperty(css, '.router-subtitle', 'fill'), '#596159 !important');
-  assert.equal(cssProperty(css, '.router-subtitle', 'opacity'), '1');
+
+  assert.match(html, /<path class="route route-inbound route-selected" d="M130 110 C151 110 161 110 181 110"\/>/);
+  assert.match(html, /<path class="route route-b route-selected" d="M267 110 C290 92 304 76 330 75"\/>/);
+  assert.match(html, /<path class="route route-answer route-selected" d="M406 75 C427 75 438 95 456 103"\/>/);
+  assert.equal(cssProperty(css, '.route-selected', 'stroke'), 'var(--copper)');
+  assert.equal(cssProperty(css, '.route-b.route-selected', 'stroke'), 'var(--forest)');
+  assert.equal(cssProperty(css, '.route-b.route-selected', 'stroke'), cssProperty(css, '.router-box', 'stroke'));
+  assert.doesNotMatch(css, /\.route-(?:inbound|answer)\.route-selected\s*\{[^}]*stroke\s*:/i);
 });
 
 test('June animates all four completion markers in sequence', async () => {
