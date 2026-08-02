@@ -786,3 +786,11 @@ test('final review mutation: encoded GitHub anchors cannot evade count or protec
   const duplicateHref = html.replace('href="https://github.com/June74"', 'href="https://github.com/June74" href="https&#58;//github.com/June74"');
   assert.throws(() => assertApprovedOutboundAnchors(duplicateHref));
 });
+
+test('Pages workflow uploads only the curated site directory', async () => {
+  const workflow = await readFile(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+  assert.match(workflow, /path:\s*site/);
+  assert.doesNotMatch(workflow, /path:\s*\.|docs\/|\.superpowers/);
+  assert.match(workflow, /pages:\s*write/);
+  assert.match(workflow, /id-token:\s*write/);
+});
