@@ -611,12 +611,21 @@ test('fine pointers receive restrained palette hover affordances on all primary 
   const expectedColors = new Map([
     ['.site-nav a:hover', 'var(--forest)'],
     ['.hero-jump:hover', 'var(--forest)'],
-    ['.site-footer > a:hover', 'var(--copper)'],
   ]);
 
   for (const [selector, expectedColor] of expectedColors) {
     assert.equal(cssProperty(fineHoverRules, selector, 'color'), expectedColor);
   }
+  const footerHoverColor = cssProperty(fineHoverRules, '.site-footer > a:hover', 'color');
+  const footerBackground = cssProperty(css, '.site-footer', 'background');
+  const footerHoverRatio = contrastRatio(footerHoverColor, footerBackground);
+  assert.ok(footerHoverRatio >= 4.5, `footer hover contrast is ${footerHoverRatio.toFixed(2)}:1; expected at least 4.5:1`);
+  assert.equal(footerHoverColor, 'var(--paper)', 'footer hover must retain the readable paper text');
+  assert.match(
+    cssProperty(fineHoverRules, '.site-footer > a:hover', 'box-shadow'),
+    /^0\s+2px\s+0\s+var\(--copper\)$/,
+    'footer hover must strengthen the existing copper rule without changing text contrast',
+  );
   assert.match(css, /:focus-visible\s*\{[^}]*outline:/i, 'hover styling must retain the visible keyboard focus treatment');
 });
 
