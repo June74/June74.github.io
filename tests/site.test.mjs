@@ -8,6 +8,17 @@ const root = path.resolve(import.meta.dirname, '..');
 const siteDir = path.join(root, 'site');
 const readSite = (name) => readFile(path.join(siteDir, name), 'utf8');
 
+async function listFiles(directory, prefix = '') {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const relative = path.posix.join(prefix, entry.name);
+    if (entry.isDirectory()) files.push(...await listFiles(path.join(directory, entry.name), relative));
+    else files.push(relative);
+  }
+  return files.sort();
+}
+
 test('page contains the approved person-first content', async () => {
   const html = await readSite('index.html');
   assert.match(html, /<h1>\s*<span>Injun Lee\.<\/span>/);
@@ -235,4 +246,32 @@ test('enhancement applies progressive disclosure states through real controller 
   fineHover.matches = false;
   projects[2].dispatch('pointerenter');
   assert.equal(projects[2].open, false);
+});
+
+test('artifact manifest and size stay inside the approved budget', async () => {
+  assert.deepEqual(await listFiles(siteDir), ['assets/favicon.svg', 'index.html', 'script.js', 'styles.css']);
+  const files = await listFiles(siteDir);
+  let total = 0;
+  for (const file of files) total += (await stat(path.join(siteDir, file))).size;
+  assert.ok(total <= 150_000, `artifact is ${total} bytes`);
+  assert.ok((await stat(path.join(siteDir, 'script.js'))).size <= 10_000);
+});
+
+test('HTML enforces the approved static security boundary', async () => {
+  const html = await readSite('index.html');
+  const policy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'none'";
+  assert.match(html, new RegExp(`<meta http-equiv="Content-Security-Policy" content="${policy.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}">`));
+  assert.match(html, /<meta name="referrer" content="no-referrer">/);
+  assert.doesNotMatch(html, /\son\w+=|<style\b|\sstyle=|<form\b|<iframe\b|<object\b|<embed\b/i);
+  assert.doesNotMatch(html, /https?:\/\/(?!github\.com\/June74)/i);
+});
+
+test('public artifact has no draft markers or prohibited personal content', async () => {
+  const files = await listFiles(siteDir);
+  const artifact = (await Promise.all(files.map((file) => readFile(path.join(siteDir, file), 'utf8')))).join('\n');
+  const draftMarkers = ['TO' + 'DO', 'TB' + 'D', 'FIX' + 'ME'];
+  const draftPattern = new RegExp(`\\b(?:${draftMarkers.join('|')})\\b|lorem ipsum|example\\.com|href="#"`, 'i');
+  assert.doesNotMatch(artifact, draftPattern);
+  assert.doesNotMatch(artifact, /Auburn|@gmail\.com|mailto:|tel:|street address|university|degree|early prototype|active development/i);
+  assert.doesNotMatch(artifact, /ochre|#C5A253/i);
 });
