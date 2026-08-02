@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import vm from 'node:vm';
 
 const root = path.resolve(import.meta.dirname, '..');
 const siteDir = path.join(root, 'site');
@@ -109,5 +110,129 @@ test('enhancement implements pinned and fine-hover states without unsafe DOM API
   assert.match(js, /function closeProject\(project\)/);
   assert.match(js, /function previewProject\(project\)/);
   assert.match(js, /function restartAnimation\(project\)/);
-  assert.doesNotMatch(js, /innerHTML|insertAdjacentHTML|eval\(|localStorage|sessionStorage|fetch\(/);
+  assert.doesNotMatch(js, /innerHTML|insertAdjacentHTML|eval\(|localStorage|sessionStorage|fetch\(|document\.write|createElement\(\s*['"]script['"]\s*\)/);
+});
+
+test('enhancement applies progressive disclosure states through real controller events', async () => {
+  class FakeClassList {
+    constructor(trace) {
+      this.values = new Set();
+      this.trace = trace;
+    }
+
+    add(...names) {
+      for (const name of names) {
+        this.values.add(name);
+        this.trace.push(`add:${name}`);
+      }
+    }
+
+    remove(...names) {
+      for (const name of names) {
+        this.values.delete(name);
+        this.trace.push(`remove:${name}`);
+      }
+    }
+
+    contains(name) {
+      return this.values.has(name);
+    }
+  }
+
+  class FakeEventTarget {
+    constructor() {
+      this.listeners = new Map();
+    }
+
+    addEventListener(type, listener) {
+      this.listeners.set(type, listener);
+    }
+
+    dispatch(type) {
+      const event = {
+        defaultPrevented: false,
+        preventDefault() {
+          this.defaultPrevented = true;
+        },
+      };
+      this.listeners.get(type)?.(event);
+      return event;
+    }
+  }
+
+  class FakeProject extends FakeEventTarget {
+    constructor(trace) {
+      super();
+      this.open = false;
+      this.classList = new FakeClassList(trace);
+      this.summary = new FakeEventTarget();
+      this.trace = trace;
+    }
+
+    querySelector(selector) {
+      return selector === '.project-summary' ? this.summary : null;
+    }
+
+    get offsetWidth() {
+      this.trace.push('flush');
+      return 100;
+    }
+  }
+
+  const trace = [];
+  const projects = [new FakeProject(trace), new FakeProject(trace), new FakeProject(trace)];
+  const fineHover = new FakeEventTarget();
+  fineHover.matches = true;
+  const js = await readSite('script.js');
+
+  vm.runInNewContext(js, {
+    document: { querySelectorAll: () => projects },
+    window: { matchMedia: () => fineHover },
+  });
+
+  projects[0].dispatch('pointerenter');
+  assert.equal(projects[0].open, true);
+  assert.equal(projects[0].classList.contains('is-preview'), true);
+  assert.equal(projects[0].classList.contains('is-animating'), true);
+  assert.deepEqual(trace.slice(-3), ['remove:is-animating', 'flush', 'add:is-animating']);
+
+  projects[0].dispatch('pointerleave');
+  assert.equal(projects[0].open, false);
+  assert.equal(projects[0].classList.contains('is-preview'), false);
+  assert.equal(projects[0].classList.contains('is-animating'), false);
+
+  const replayStart = trace.length;
+  projects[0].dispatch('pointerenter');
+  assert.deepEqual(trace.slice(replayStart), [
+    'add:is-preview',
+    'remove:is-animating',
+    'flush',
+    'add:is-animating',
+  ]);
+
+  const previewClick = projects[0].summary.dispatch('click');
+  assert.equal(previewClick.defaultPrevented, true);
+  assert.equal(projects[0].open, true);
+  assert.equal(projects[0].classList.contains('is-preview'), false);
+  assert.equal(projects[0].classList.contains('is-pinned'), true);
+
+  projects[1].summary.dispatch('click');
+  assert.equal(projects[0].open, false);
+  assert.equal(projects[0].classList.contains('is-pinned'), false);
+  assert.equal(projects[1].open, true);
+  assert.equal(projects[1].classList.contains('is-pinned'), true);
+
+  projects[2].dispatch('pointerenter');
+  assert.equal(projects[2].open, false);
+
+  projects[1].summary.dispatch('click');
+  projects[2].dispatch('pointerenter');
+  assert.equal(projects[2].classList.contains('is-preview'), true);
+  fineHover.dispatch('change');
+  assert.equal(projects[2].open, false);
+  assert.equal(projects[2].classList.contains('is-preview'), false);
+
+  fineHover.matches = false;
+  projects[2].dispatch('pointerenter');
+  assert.equal(projects[2].open, false);
 });
