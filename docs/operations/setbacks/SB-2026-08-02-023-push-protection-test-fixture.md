@@ -1,8 +1,8 @@
 # SB-2026-08-02-023: GitHub push protection rejected a provider-shaped test fixture in branch history
 
-- Status: contained
+- Status: closed
 - First observed: 2026-08-02 00:48 CDT
-- Last observed: 2026-08-02 00:52 CDT
+- Last observed: 2026-08-02 00:57 CDT
 - Phase/task: Publish feature branch and open draft pull request
 - Environment: GitHub public repository `June74/June74.github.io`
 - Version/commit: original branch `feature/portfolio-implementation` at `0d545ee`
@@ -25,8 +25,8 @@ The original feature branch is preserved locally. A new `codex/portfolio-impleme
 
 ## Verification
 
-The new source-level regression first failed against the embedded literal as expected. Full automated verification and a clean protected push are pending.
+The source-level regression first failed against the embedded literal as expected. The focused security and workflow selection passed 3/3, the full static suite passed 34/34, syntax and whitespace checks passed, and the committed provider-shaped scan found zero matches. GitHub accepted commit `b1e6625` on `codex/portfolio-implementation-pr` without a bypass.
 
 ## Next diagnostic step
 
-Run the focused and full suites, scan the squashed commit range for provider-shaped literals, commit the clean snapshot, and push the new branch without using a bypass.
+None. Preserve the original local feature branch only as historical evidence and publish from the protected clean branch.

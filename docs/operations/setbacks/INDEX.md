@@ -26,4 +26,4 @@
 | SB-2026-08-02-020 | closed | 2026-08-02 00:25 CDT | Acceptance harness assumptions delayed responsive and interaction checks |
 | SB-2026-08-02-021 | closed | 2026-08-02 00:25 CDT | Whole-branch review package used an invalid PowerShell pathspec form |
 | SB-2026-08-02-022 | closed | 2026-08-02 00:26 CDT | Two developer tasks were briefly assigned the same test file |
-| SB-2026-08-02-023 | contained | 2026-08-02 00:52 CDT | GitHub push protection rejected a provider-shaped test fixture in branch history |
+| SB-2026-08-02-023 | closed | 2026-08-02 00:57 CDT | GitHub push protection rejected a provider-shaped test fixture in branch history |
