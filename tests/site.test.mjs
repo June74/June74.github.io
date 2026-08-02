@@ -995,6 +995,27 @@ test('Pages workflow is fully pinned, serialized, and uploads only the curated s
   ]);
 });
 
+test('Pages workflow isolates write permissions and disables persisted checkout credentials', async () => {
+  const workflow = await readFile(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+  const jobsStart = workflow.indexOf('\njobs:');
+  const testJobStart = workflow.indexOf('\n  test:', jobsStart);
+  const deployJobStart = workflow.indexOf('\n  deploy:', testJobStart);
+  assert.ok(jobsStart >= 0 && testJobStart > jobsStart && deployJobStart > testJobStart, 'workflow must contain ordered test and deploy jobs');
+
+  const workflowScope = workflow.slice(0, jobsStart);
+  const testJob = workflow.slice(testJobStart, deployJobStart);
+  const deployJob = workflow.slice(deployJobStart);
+  const permissionsBlock = (job) => job.match(/\n    permissions:\n((?:      [^\n]+(?:\n|$))+)/)?.[1];
+  assert.doesNotMatch(workflowScope, /(?:^|\n)permissions:/);
+  assert.equal(permissionsBlock(testJob), '      contents: read\n');
+  assert.equal(permissionsBlock(deployJob), '      contents: read\n      pages: write\n      id-token: write\n');
+  assert.equal(workflow.match(/pages:\s*write/g)?.length, 1, 'only the deploy job may write Pages');
+  assert.equal(workflow.match(/id-token:\s*write/g)?.length, 1, 'only the deploy job may mint an OIDC token');
+
+  const hardenedCheckouts = workflow.match(/- uses: actions\/checkout@[0-9a-f]{40}[^\n]*\n        with:\n          persist-credentials: false/g) ?? [];
+  assert.equal(hardenedCheckouts.length, 2, 'both checkout steps must disable persisted credentials');
+});
+
 test('predeployment checklist separates post-authorization live-URL acceptance from local readiness', async () => {
   const checklist = await readFile(path.join(root, 'docs', 'release', 'predeployment-checklist.md'), 'utf8');
   assert.match(checklist, /## Post-authorization live-URL acceptance/);
