@@ -21,6 +21,10 @@
 - JavaScript is at most 10 KB and the four-file artifact is at most 150 KB uncompressed.
 - Public deployment, repository creation, remote push, and Pages enablement remain unauthorized in this plan.
 
+### Approved implementation clarification — SVG namespace
+
+On 2026-08-01, the owner selected Option A to resolve a conflict between the exact favicon markup and its planned URL scan. The standard `xmlns="http://www.w3.org/2000/svg"` value is required and is the sole permitted HTTP(S) value in the favicon. The test removes that exact namespace before asserting that no other HTTP(S) or `data:` URL, script, event handler, or `foreignObject` remains. This supersedes only the original broad favicon URL assertion; all no-remote-resource constraints remain unchanged.
+
 ## File and ownership map
 
 | File | Responsibility | Primary slice |
@@ -270,7 +274,9 @@ test('visual system uses only the approved accent tokens', async () => {
 test('favicon is a static local SVG', async () => {
   const svg = await readFile(path.join(siteDir, 'assets', 'favicon.svg'), 'utf8');
   assert.match(svg, /^<svg\b/);
-  assert.doesNotMatch(svg, /<script|on\w+=|foreignObject|https?:|data:/i);
+  assert.match(svg, /xmlns="http:\/\/www\.w3\.org\/2000\/svg"/i);
+  const withoutNamespace = svg.replace(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/i, '');
+  assert.doesNotMatch(withoutNamespace, /<script|on\w+=|foreignObject|https?:|data:/i);
   assert.match(svg, /#356351/i);
 });
 ```
