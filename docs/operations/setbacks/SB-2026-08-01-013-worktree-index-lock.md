@@ -37,3 +37,7 @@ A follow-up commit inspection confirmed `ae14a9a` contains only the intended Tas
 ## Next diagnostic step
 
 None. Continue using narrowly scoped escalation for Git metadata writes in this worktree.
+
+### Recurrence at 2026-08-01 23:28 CDT
+
+Task 5 staging again failed at the same worktree `index.lock` path before any files were staged. The narrowly scoped escalated retry staged exactly `.github/workflows/pages.yml`, `README.md`, `docs/release/predeployment-checklist.md`, and `tests/site.test.mjs`; staged whitespace validation passed; and commit `7d8e73f` (`chore: prepare curated Pages deployment`) was created. The cause and prevention remain unchanged.

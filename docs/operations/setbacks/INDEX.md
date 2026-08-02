@@ -14,4 +14,5 @@
 | SB-2026-08-01-010 | closed | 2026-08-01 21:56 CDT | Accessibility test used the wrong assertion input type |
 | SB-2026-08-01-011 | closed | 2026-08-01 22:12 CDT | Favicon namespace conflicts with planned URL test |
 | SB-2026-08-01-012 | contained | 2026-08-01 22:28 CDT | Task 3 browser runtime was unavailable |
-| SB-2026-08-01-013 | closed | 2026-08-01 23:17 CDT | Sandbox denied creation of the worktree Git index lock |
+| SB-2026-08-01-013 | closed | 2026-08-01 23:28 CDT | Sandbox denied creation of the worktree Git index lock |
+| SB-2026-08-01-014 | closed | 2026-08-01 23:25 CDT | Workflow inventory check omitted the repeated checkout invocation |
