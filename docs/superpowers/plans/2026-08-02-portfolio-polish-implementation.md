@@ -8,6 +8,8 @@
 
 **Tech Stack:** Semantic HTML5, dependency-free CSS, inline SVG, vanilla JavaScript, Node.js built-in test runner.
 
+**Execution status:** Complete and locally accepted on 2026-08-02. The task checkboxes below are preserved as the immutable implementation recipe; execution evidence is recorded in `.superpowers/sdd/progress.md` and `docs/release/local-acceptance.md`.
+
 ## Global Constraints
 
 - The complete hero heading remains exposed as `Injun Lee. I build AI systems around people.` and contains no “I am” phrase.
