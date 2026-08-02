@@ -499,12 +499,26 @@ function assertMmSampleContract(html, css) {
 
 test('page contains the approved person-first content', async () => {
   const html = await readSite('index.html');
-  assert.match(html, /<h1>\s*<span>Injun Lee\.<\/span>/);
+  assert.match(html, /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>/);
   assert.match(html, /I build AI systems/);
   assert.match(html, /driven by imagination\./);
   assert.match(html, /I own the product direction and routing design/);
   assert.match(html, /I own the product direction and behavior design/g);
   assert.doesNotMatch(html, /Auburn|rÃ©sumÃ©|resume/i);
+});
+
+test('hero uses the approved compact personal signature', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+
+  assert.match(
+    html,
+    /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>\s*<span class="hero-thesis-line">I build AI systems<\/span>\s*<span class="hero-thesis-line">around people\.<\/span>\s*<\/h1>/,
+  );
+  assert.doesNotMatch(html, /\bI am\s+Injun Lee\b/i);
+  assert.match(css, /\.hero-name\s*\{[^}]*font:\s*680\s+clamp\(1\.75rem,\s*3vw,\s*2\.2rem\)\/1\s+var\(--sans\)/i);
+  assert.match(css, /\.hero-name::after\s*\{[^}]*width:\s*42px[^}]*height:\s*2px[^}]*background:\s*var\(--copper\)/i);
+  assert.match(css, /\.hero h1\s*\{[^}]*font:\s*500\s+clamp\(2\.65rem,\s*4\.6vw,\s*4\.65rem\)\/\.94\s+var\(--display\)/i);
 });
 
 test('page uses three native project disclosures', async () => {
