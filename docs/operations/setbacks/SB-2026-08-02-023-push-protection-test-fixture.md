@@ -1,8 +1,8 @@
 # SB-2026-08-02-023: GitHub push protection rejected a provider-shaped test fixture in branch history
 
-- Status: contained
+- Status: closed
 - First observed: 2026-08-02 00:48 CDT
-- Last observed: 2026-08-02 01:40 CDT
+- Last observed: 2026-08-02 01:47 CDT
 - Phase/task: Publish feature branch and open draft pull request
 - Environment: GitHub public repository `June74/June74.github.io`
 - Version/commit: original branch `feature/portfolio-implementation` at `0d545ee`
@@ -33,6 +33,8 @@ The existing prevention was too narrow because it rejected only Slack-shaped lit
 
 The source-level regression first failed against the embedded literal as expected. The focused security and workflow selection passed 3/3, the full static suite passed 34/34, syntax and whitespace checks passed, and the committed provider-shaped scan found zero matches. GitHub accepted commit `b1e6625` on `codex/portfolio-implementation-pr` without a bypass.
 
+For the 2026-08-02 recurrence, the generalized source-level regression failed first against the embedded private-key fixture. After runtime assembly, the focused affected selection passed 4/4, the full suite passed 37/37, and an independent tracked-source scan reported zero provider-shaped literal matches. Security review approved commit `59f3d30` with no findings and confirmed the detector set and mutation values remain equivalent.
+
 ## Next diagnostic step
 
-Generalize the source-level fixture regression, rerun focused/full tests, and repeat the tracked-source scan. Close only when every tracked provider-shaped literal category reports zero matches.
+None. Keep all future credential-shaped mutation inputs assembled at runtime and retain the generalized source-level regression.
