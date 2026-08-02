@@ -96,7 +96,7 @@ a { color: inherit; }
 
 .june-layout, .mm-layout { min-height: 242px; display: grid; gap: 14px; padding: 14px; }
 .june-layout { grid-template-columns: 1.35fr .65fr; }
-.calendar-card, .task-card, .chart-card, .insights-card { min-width: 0; padding: 12px; border: 1px solid #c9cbc3; border-radius: 9px; background: #fcfbf7; }
+.calendar-card, .todo-card, .chart-card, .insights-card { min-width: 0; padding: 12px; border: 1px solid #c9cbc3; border-radius: 9px; background: #fcfbf7; }
 .mini-heading { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--forest); font-size: .55rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
 .schedule-grid { display: grid; grid-template-columns: 34px repeat(5, minmax(0, 1fr)); grid-auto-rows: 29px; gap: 3px; }
 .schedule-grid > span:not(.time):not(.slot) { display: grid; place-items: center; color: #737c75; font-size: .45rem; font-weight: 700; }
