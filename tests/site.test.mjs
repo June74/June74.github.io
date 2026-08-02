@@ -658,6 +658,56 @@ test('enhancement applies progressive disclosure states and keyboard activation 
   assert.equal(nonActivation.defaultPrevented, false);
   assert.equal(projects[2].open, false);
   assert.equal(projects[2].classList.contains('is-pinned'), false);
+
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  const repeatEnterOpen = projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  const repeatEnter = projects[0].summary.dispatch('keydown', { key: 'Enter', repeat: true });
+  const repeatEnterClick = projects[0].summary.dispatch('click', { detail: 0 });
+  projects[0].summary.dispatch('keyup', { key: 'Enter' });
+  assert.equal(repeatEnterOpen.defaultPrevented, true);
+  assert.equal(repeatEnter.defaultPrevented, true);
+  assert.equal(repeatEnterClick.defaultPrevented, true);
+  assert.equal(projects[0].open, true);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  projects[0].summary.dispatch('click', { detail: 1 });
+
+  const repeatSpaceOpen = projects[0].summary.dispatch('keydown', { key: ' ' });
+  const repeatSpace = projects[0].summary.dispatch('keydown', { key: ' ', repeat: true });
+  projects[0].summary.dispatch('keyup', { key: ' ' });
+  const repeatSpaceClick = projects[0].summary.dispatch('click', { detail: 0 });
+  assert.equal(repeatSpaceOpen.defaultPrevented, true);
+  assert.equal(repeatSpace.defaultPrevented, true);
+  assert.equal(repeatSpaceClick.defaultPrevented, true);
+  assert.equal(projects[0].open, true);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  projects[0].summary.dispatch('click', { detail: 1 });
+
+  projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  const armedPointerClick = projects[0].summary.dispatch('click', { detail: 1 });
+  const armedKeyboardClick = projects[0].summary.dispatch('click', { detail: 0 });
+  projects[0].summary.dispatch('keyup', { key: 'Enter' });
+  assert.equal(armedPointerClick.defaultPrevented, true);
+  assert.equal(armedKeyboardClick.defaultPrevented, true);
+  assert.equal(projects[0].open, false);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+
+  projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  projects[0].summary.dispatch('keyup', { key: 'Enter' });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const standaloneKeyboardClick = projects[0].summary.dispatch('click', { detail: 0 });
+  assert.equal(standaloneKeyboardClick.defaultPrevented, true);
+  assert.equal(projects[0].open, false);
+
+  projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  projects[0].summary.dispatch('keyup', { key: 'Enter' });
+  projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const newerActivationClick = projects[0].summary.dispatch('click', { detail: 0 });
+  assert.equal(newerActivationClick.defaultPrevented, true);
+  assert.equal(projects[0].open, false);
+  projects[0].summary.dispatch('keyup', { key: 'Enter' });
+  await new Promise((resolve) => setTimeout(resolve, 0));
 });
 
 test('artifact manifest and size stay inside the approved budget', async () => {

@@ -46,12 +46,13 @@ function togglePinned(project) {
 
 for (const project of projects) {
   const summary = project.querySelector('.project-summary');
-  let suppressKeyboardClick = false;
+  let activationGeneration = 0;
+  let pendingKeyboardClick = 0;
 
   summary.addEventListener('click', (event) => {
     event.preventDefault();
-    if (suppressKeyboardClick) {
-      suppressKeyboardClick = false;
+    if (event.detail === 0 && pendingKeyboardClick !== 0) {
+      pendingKeyboardClick = 0;
       return;
     }
     togglePinned(project);
@@ -60,15 +61,18 @@ for (const project of projects) {
   summary.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
-    suppressKeyboardClick = true;
+    if (event.repeat) return;
+    activationGeneration += 1;
+    pendingKeyboardClick = activationGeneration;
     togglePinned(project);
   });
 
   summary.addEventListener('keyup', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
+    const completedGeneration = activationGeneration;
     setTimeout(() => {
-      suppressKeyboardClick = false;
+      if (pendingKeyboardClick === completedGeneration) pendingKeyboardClick = 0;
     }, 0);
   });
 
