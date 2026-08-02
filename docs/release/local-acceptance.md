@@ -3,22 +3,22 @@
 This record captures local release-candidate observations only. It does not prove or authorize a public release.
 
 - Evidence date: 2026-08-02 (CDT)
-- Browser-observation reference: `82518e2` (`fix: deduplicate project keyboard activation`)
-- Integration note: `8411a27` (`fix: harden keyboard activation deduplication`) landed after those browser observations and became this ledger commit's parent; its integrated syntax, automated, and browser regression checks remain pending
+- Browser-observation reference: `12fd68c` (`fix: reconcile MM sample spending`), including keyboard hardening from `8411a27`
+- Review note: the independent keyboard review approved the hardened behavior; independent MM review remains pending
 - Preview origin: `http://127.0.0.1:8000/`
 - Browser: controlled Codex in-app Chromium browser; the exact browser version was not exposed in the recorded session
-- Current disposition: **local acceptance remains open** while the MM number inconsistency is corrected and rechecked
+- Current disposition: browser and automated checks for `12fd68c` passed; release acceptance remains open for independent MM review and the remaining predeployment and public-release gates below
 - **Public deployment not authorized**
 
 ## Served artifact
 
 The exact `site/` directory was served with Python's static HTTP server. A direct request to `http://127.0.0.1:8000/` returned HTTP `200` and the expected portfolio document.
 
-The locally inspected artifact contains four files and totals 27,999 bytes:
+The locally inspected artifact contains four files and totals 28,056 bytes:
 
 | File | Bytes |
 | --- | ---: |
-| `site/index.html` | 10,763 |
+| `site/index.html` | 10,820 |
 | `site/styles.css` | 14,156 |
 | `site/script.js` | 2,604 |
 | `site/assets/favicon.svg` | 476 |
@@ -28,7 +28,7 @@ The locally inspected artifact contains four files and totals 27,999 bytes:
 | Viewport | Result |
 | --- | --- |
 | 1440 by 1000 | Document client width equaled scroll width, so no horizontal overflow was present. The hero and footer used their intended two-column layouts. All three project summaries were present. Keyboard focus rendered a 3 px copper outline. The browser console contained no warnings or errors. |
-| 820 by 1000 | Document client width equaled scroll width. The hero and footer collapsed to one column. The open June and MM visual panels each measured 695 px wide and remained readable. |
+| 820 by 1000 | After reloading `12fd68c`, document client width and scroll width both measured 805 px, so no horizontal overflow was present. The hero and footer collapsed to one column. The open June and MM visual panels each measured 695 px wide and remained readable. The browser console contained no warnings or errors. |
 | 390 by 844 | Document client width equaled scroll width. The hero and footer used one column. All three projects and the footer were visually inspected without overlap or clipped horizontal content. |
 
 The approved implementation supports narrower widths through CSS, but this evidence record does not claim a native-browser check at every width listed in the broader test plan.
@@ -36,8 +36,8 @@ The approved implementation supports narrower widths through CSS, but this evide
 ## Input and disclosure behavior
 
 - Pointer click pinned Synapse and exposed its expanded visual.
-- With June open, pressing `Enter` on MM switched the pinned disclosure from June to MM.
-- Pressing `Space` again on MM closed it.
+- With June open, pressing `Enter` on MM switched the pinned disclosure from June to MM; a second `Enter` closed MM.
+- With June open, pressing `Space` on MM switched the pinned disclosure from June to MM.
 - Keyboard focus used the visible 3 px copper outline recorded above.
 - Automated interaction checks cover fine-pointer hover preview and replay behavior. Native hover replay was not independently exercised through the controlled browser capability in this pass.
 - Native JavaScript-disabled behavior was not independently exercised in this pass; progressive disclosure behavior remains covered by the static/automated contract.
@@ -47,12 +47,15 @@ The approved implementation supports narrower widths through CSS, but this evide
 - Synapse routing strokes were observed progressing from a `180px` dash offset to `0px`, showing that the routing lines draw into their completed state.
 - June displayed five calendar events after its animation, with event timing checked as sequential rather than simultaneous.
 - Reduced-motion behavior is covered by automated/static checks. The controlled browser capability did not expose native reduced-motion emulation for this pass, so this record does not claim a native-browser reduced-motion result.
-- **Pending: MM contains an active number inconsistency.** Its values must be reconciled under the current test-driven correction and the completed MM visual must be rechecked before local acceptance can close.
+- MM's reconciled visual displayed `This week $300`, `Weekly plan $500`, `Spent $300`, and `$200 remaining`. The values reconcile arithmetically, remained visible at 820 by 1000, and produced no browser console warnings or errors.
+
+## Automated verification
+
+At `12fd68c`, `node --check site/script.js` passed and `node --test tests/site.test.mjs` reported 28 passing tests with no failures, skips, cancellations, or todo tests. `git diff --check` completed without a content error; its only output was line-ending warnings for unrelated, pre-existing setback-record changes.
 
 ## Checks not yet closed
 
-- Reconcile and recheck the MM numeric story.
-- Rerun the complete syntax and automated test suite after the MM correction is committed.
+- Complete and record the independent MM review.
 - Record a Lighthouse run and tool version if it remains part of the release gate.
 - Complete any native-browser gaps required by the final release decision, including reduced-motion emulation, hover replay, and JavaScript-disabled behavior where the available tooling permits them.
 - Complete the owner review of public copy, metadata, and the release commit.
