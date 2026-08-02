@@ -521,6 +521,17 @@ test('hero uses the approved compact personal signature', async () => {
   assert.match(css, /\.hero h1\s*\{[^}]*font:\s*500\s+clamp\(2\.65rem,\s*4\.6vw,\s*4\.65rem\)\/\.94\s+var\(--display\)/i);
 });
 
+test('Synapse router is a light outlined diagram node', async () => {
+  const css = await readSite('styles.css');
+
+  assert.equal(cssProperty(css, '.router-box', 'fill'), '#fcfbf7');
+  assert.equal(cssProperty(css, '.router-box', 'stroke'), 'var(--forest)');
+  assert.equal(cssProperty(css, '.router-box', 'stroke-width'), '1.4');
+  assert.equal(cssProperty(css, '.router-label', 'fill'), 'var(--forest) !important');
+  assert.equal(cssProperty(css, '.router-subtitle', 'fill'), '#596159 !important');
+  assert.equal(cssProperty(css, '.router-subtitle', 'opacity'), '1');
+});
+
 test('page uses three native project disclosures', async () => {
   const html = await readSite('index.html');
   const projects = html.match(/<details class="project" data-project="(synapse|june|mm)">/g) ?? [];

@@ -80,9 +80,9 @@ a { color: inherit; }
 .synapse-diagram text { fill: var(--ink); font: 9px var(--sans); }
 .diagram-box { fill: #fcfbf7; stroke: #95a099; }
 .diagram-label { font-weight: 700 !important; }
-.router-box { fill: var(--forest); }
-.router-label { fill: #fff !important; font-weight: 700 !important; }
-.router-subtitle { fill: #fff !important; opacity: .68; }
+.router-box { fill: #fcfbf7; stroke: var(--forest); stroke-width: 1.4; }
+.router-label { fill: var(--forest) !important; font-weight: 700 !important; }
+.router-subtitle { fill: #596159 !important; opacity: 1; }
 .route { fill: none; stroke: #9ea8a1; stroke-width: 1.2; stroke-dasharray: 180; stroke-dashoffset: 0; }
 .route-selected { stroke: var(--copper); stroke-width: 2; }
 .model-selected { fill: #f0ded3; stroke: var(--copper); stroke-width: 1.6; }
