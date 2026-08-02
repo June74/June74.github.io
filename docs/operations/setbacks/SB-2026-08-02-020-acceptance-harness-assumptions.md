@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-02 00:14 CDT
-- Last observed: 2026-08-02 11:59 CDT
+- Last observed: 2026-08-02 14:10 CDT
 - Phase/task: Task 6 integrated browser acceptance
 - Environment: Codex in-app browser and Windows PowerShell
 - Version/commit: `783ec53`
@@ -33,6 +33,14 @@ During the 2026-08-02 portfolio-polish pass, a previously claimed preview-tab bi
 
 The recovered check confirmed that all four June task markers begin empty, progress monotonically from zero to four completed markers, reset to zero after close and reopen, and generate no browser warnings or errors. This recurrence is closed without a product-code change.
 
+## Recurrence during project-description acceptance
+
+The first responsive probe called an upstream-style `setViewportSize` method that this constrained browser surface does not expose. The integration lead then read the browser viewport capability documentation and used `browser.capabilities.get("viewport").set(...)` after creating the acceptance tab. The earlier supervised server also reached its configured 120-second command timeout during recovery, so it was restarted with a longer supervised lifetime before the final measurements.
+
+- Confirmed cause: the unsupported method and configured server lifetime were acceptance-harness assumptions, not product failures.
+- Correction: use the documented viewport capability on an existing tab and keep the supervised loopback server alive for the full acceptance pass.
+- Verification: the existing tab reported exactly 390 by 844 and 1440 by 900 CSS pixels; both sizes had equal client and scroll widths, all three collapsed descriptions remained inside the viewport, and the console had zero warnings or errors.
+
 ## Recurrence during public-URL acceptance
 
 After GitHub Pages deployed merge `02ef82b`, the first controlled pointer click intended to open June left both June and Synapse closed. The deployed hero and Synapse checks had already passed, the page console remained clean, and no page state or source was mutated by the probe. The discrepancy is contained to the acceptance action while the exact event sequence is reproduced and compared with the already-passing keyboard and local-browser paths.
@@ -50,4 +58,4 @@ The controlled public tab later disappeared from the browser's open-tab inventor
 
 ## Next diagnostic step
 
-None. Use a fresh claimed tab for each bounded public-URL interaction sequence and discard released bindings immediately.
+None. Use the documented viewport capability on an existing tab, and use a fresh claimed tab for each bounded public-URL interaction sequence.

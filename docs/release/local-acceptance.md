@@ -156,3 +156,30 @@ This addendum records local browser evidence for implementation commit `2cdeb0a`
 ### Disposition
 
 The implemented route sequence is locally accepted for owner visual review. No SVG geometry, animation timing, JavaScript, dependency, asset, external request, public information, or deployment state changed.
+
+---
+
+## Project product-description acceptance — 2026-08-02
+
+This addendum records local evidence for implementation commit `fc340b1` on `codex/project-product-descriptions`. It covers only the three owner-approved collapsed project summaries. It is local-preview evidence, not deployment evidence.
+
+### Exact-copy and review evidence
+
+- Synapse renders exactly: `An AI routing system that analyzes each prompt and matches it with a suitable model.`
+- June renders exactly: `An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.`
+- MM renders exactly: `A personal finance tracker that turns spending patterns into clear insights and practical suggestions.`
+- Each sentence appears once, all three projects remain collapsed, and the former `I own the product direction` wording is absent.
+- Independent review returned spec compliance PASS and task quality PASS with no Critical, Important, or Minor findings.
+
+### Automated and browser evidence
+
+- The focused exact-copy contract passed after its expected RED result.
+- `node --test tests/site.test.mjs`: 37 passing tests with zero failures.
+- `node --check site/script.js`, `node --check tests/site.test.mjs`, and `git diff --check`: passed.
+- At 390 by 844 CSS pixels, document client and scroll widths were both 375 CSS pixels; all three summaries remained inside the viewport with no horizontal overflow.
+- At 1440 by 900 CSS pixels, document client and scroll widths were both 1425 CSS pixels; all three summaries remained inside the viewport with no horizontal overflow.
+- The controlled browser reported zero console warnings or errors at both responsive sizes.
+
+### Disposition
+
+The three descriptions are locally accepted. No project name, number, topic, diagram, layout, typography, animation, link, disclosure behavior, dependency, asset, request, external service, public information boundary, or deployment state changed. Public acceptance still requires the reviewed commit to be merged, deployed by GitHub Pages, and smoke-tested at the real URL.
