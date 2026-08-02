@@ -1,9 +1,9 @@
 # SB-2026-08-01-013 — worktree index lock denied by sandbox
 
-**Status:** closed  
-**First observed:** 2026-08-01 22:39 CDT  
-**Last observed:** 2026-08-01 23:17 CDT  
-**Phase/task:** Task 4 static release contracts  
+**Status:** closed
+**First observed:** 2026-08-01 22:39 CDT
+**Last observed:** 2026-08-01 23:17 CDT
+**Phase/task:** Task 4 static release contracts
 **Environment:** Windows worktree `portfolio-implementation` at the Task 4 base commit lineage
 
 ## Symptom and impact
