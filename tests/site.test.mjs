@@ -101,3 +101,13 @@ test('favicon is a static local SVG', async () => {
   assert.doesNotMatch(svg, /<(?:image|use)\b|(?:href|xlink:href)\s*=/i);
   assert.match(svg, /#356351/i);
 });
+
+test('enhancement implements pinned and fine-hover states without unsafe DOM APIs', async () => {
+  const js = await readSite('script.js');
+  assert.match(js, /matchMedia\('\(hover: hover\) and \(pointer: fine\)'\)/);
+  assert.match(js, /function openPinned\(project\)/);
+  assert.match(js, /function closeProject\(project\)/);
+  assert.match(js, /function previewProject\(project\)/);
+  assert.match(js, /function restartAnimation\(project\)/);
+  assert.doesNotMatch(js, /innerHTML|insertAdjacentHTML|eval\(|localStorage|sessionStorage|fetch\(/);
+});
