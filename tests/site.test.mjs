@@ -58,10 +58,35 @@ test('visual system uses only the approved accent tokens', async () => {
   assert.match(css, /--forest:\s*#356351/i);
   assert.match(css, /--copper:\s*#B86F4B/i);
   assert.match(css, /--slate:\s*#718999/i);
+  assert.doesNotMatch(css, /--sage\s*:|var\(--sage\)/i);
   assert.doesNotMatch(css, /ochre|#C5A253/i);
+  assert.doesNotMatch(css, /@import|url\(|https?:/i);
   assert.match(css, /:focus-visible/);
   assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /@media\s*\(max-width:\s*820px\)/);
+  assert.match(css, /@media\s*\(max-width:\s*420px\)/);
+});
+
+test('mobile layout targets the real project and footer structures', async () => {
+  const css = await readSite('styles.css');
+  assert.doesNotMatch(css, /\.section-heading\s*,\s*\.project-summary\s*\{\s*grid-template-columns:\s*34px\s+1fr\s+auto/i);
+  assert.match(css, /\.project-summary\s*\{\s*grid-template-columns:\s*34px\s+1fr\s+auto/i);
+  assert.doesNotMatch(css, /\.footer-top\s*\{/i);
+  assert.match(css, /\.site-footer\s*\{\s*grid-template-columns:\s*1fr/i);
+});
+
+test('project diagrams have no-JS final states and reduced-motion final completion marks', async () => {
+  const css = await readSite('styles.css');
+  assert.match(css, /\.route\s*\{[^}]*stroke-dashoffset:\s*0/i);
+  assert.match(css, /\.answer-copy\s*\{[^}]*opacity:\s*1/i);
+  assert.match(css, /\.calendar-event\s*\{[^}]*opacity:\s*1[^}]*transform:\s*none/i);
+  assert.match(css, /\.spending-path\s*\{[^}]*stroke-dashoffset:\s*0/i);
+  assert.match(css, /\.chart-point\s*\{[^}]*opacity:\s*1/i);
+  assert.match(css, /\.budget-fill\s*\{[^}]*width:\s*60%/i);
+  assert.match(css, /\.insight-card\s*\{[^}]*opacity:\s*1[^}]*transform:\s*none/i);
+  assert.match(css, /\.task::before\s*\{[^}]*border:\s*[^;]*var\(--forest\)[^}]*background:\s*var\(--forest\)[^}]*color:\s*#fff/i);
+  assert.match(css, /animation-delay:\s*0s\s*!important/i);
+  assert.match(css, /transition-delay:\s*0s\s*!important/i);
 });
 
 test('favicon is a static local SVG', async () => {
@@ -70,7 +95,9 @@ test('favicon is a static local SVG', async () => {
   const exactStandardNamespace = 'xmlns="http://www.w3.org/2000/svg"';
   assert.ok(svg.includes(exactStandardNamespace));
   const svgWithoutStandardNamespace = svg.replace(exactStandardNamespace, 'xmlns=""');
-  assert.doesNotMatch(svgWithoutStandardNamespace, /<script|on\w+=|foreignObject|https?:|data:/i);
+  const unsafeSvgContent = /<script|on\w+\s*=|foreignObject|https?:|data:/i;
+  assert.doesNotMatch(svgWithoutStandardNamespace, unsafeSvgContent);
+  assert.match('<svg onload = "alert(1)">', unsafeSvgContent);
   assert.doesNotMatch(svg, /<(?:image|use)\b|(?:href|xlink:href)\s*=/i);
   assert.match(svg, /#356351/i);
 });
