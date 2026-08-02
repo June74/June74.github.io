@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-01 23:53 CDT
-- Last observed: 2026-08-02 00:00 CDT
+- Last observed: 2026-08-02 14:04 CDT
 - Phase/task: Task 6 integrated browser acceptance setup
 - Environment: PowerShell on Windows
 - Version/commit: `9970011`
@@ -28,6 +28,10 @@ The detached `cmd.exe` attempt retained the command tool's output handle and did
 
 Python created a detached child and returned its process identifier, but the child exited before opening the loopback listener. No listener or public exposure remained.
 
+### Recurrence at 2026-08-02 14:04 CDT
+
+A new `Start-Process` attempt reproduced the same duplicate case-insensitive `Path` key failure before Python launched. The browser's preceding connection attempt had already returned `ERR_CONNECTION_REFUSED`, so the preview remained unavailable and no partial server or external exposure was created. The established correction below remains the required path.
+
 ## Cause analysis
 
 - Confirmed cause: PowerShell encountered both case variants of the path environment key while constructing the child environment.
@@ -41,7 +45,7 @@ Avoid detached launch methods on this host. Run the loopback server as a supervi
 
 ## Verification
 
-The supervised command cell started the loopback-only server successfully. A separate direct request returned HTTP 200, the expected 10,763-byte document, and the approved page title.
+The supervised command cell started the loopback-only server successfully in the original occurrence. On 2026-08-02, the repeated supervised launch was verified with `curl.exe --max-time 5`: HTTP 200, the current 10,944-byte document, and a loopback-only Python server response.
 
 ## Next diagnostic step
 

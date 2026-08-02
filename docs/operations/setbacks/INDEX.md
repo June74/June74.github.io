@@ -19,7 +19,9 @@
 | SB-2026-08-01-012 | contained | 2026-08-01 22:28 CDT | Task 3 browser runtime was unavailable |
 | SB-2026-08-01-013 | closed | 2026-08-01 23:28 CDT | Sandbox denied creation of the worktree Git index lock |
 | SB-2026-08-01-014 | closed | 2026-08-01 23:25 CDT | Workflow inventory check omitted the repeated checkout invocation |
-| SB-2026-08-01-015 | closed | 2026-08-02 00:00 CDT | Local server launch hit an environment-key collision |
+| SB-2026-08-01-015 | closed | 2026-08-02 14:06 CDT | Local server launch hit an environment-key collision |
+| SB-2026-08-02-024 | closed | 2026-08-02 14:06 CDT | PowerShell HTTP probe timed out while curl succeeded |
+| SB-2026-08-02-025 | closed | 2026-08-02 14:11 CDT | Sandboxed GitHub preflight produced a false authentication failure |
 | SB-2026-08-01-016 | closed | 2026-08-02 00:00 CDT | Listener query was denied during local acceptance setup |
 | SB-2026-08-02-017 | contained | 2026-08-02 00:03 CDT | Browser runtime rejected networkidle wait mode |
 | SB-2026-08-02-018 | contained | 2026-08-02 00:08 CDT | Browser URL policy blocked an isolated native-control page |

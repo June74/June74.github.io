@@ -502,8 +502,27 @@ test('page contains the approved person-first content', async () => {
   assert.match(html, /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>/);
   assert.match(html, /I build AI systems/);
   assert.match(html, /driven by imagination\./);
-  assert.match(html, /I own the product direction and routing design/);
-  assert.match(html, /I own the product direction and behavior design/g);
+  const productDescriptions = [
+    ['synapse', 'An AI routing system that analyzes each prompt and matches it with a suitable model.'],
+    ['june', 'An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.'],
+    ['mm', 'A personal finance tracker that turns spending patterns into clear insights and practical suggestions.'],
+  ];
+  const assertProjectDescriptions = (source) => {
+    assert.equal((source.match(/class="project-line"/g) ?? []).length, 3, 'page has exactly three project descriptions');
+    for (const [project, description] of productDescriptions) {
+      assert.equal(source.split(description).length - 1, 1, `${description} appears exactly once`);
+      const projectSection = source.match(new RegExp(`<details\\s+class="project"\\s+data-project="${project}"[^>]*>([\\s\\S]*?)</details>`));
+      assert.ok(projectSection, `${project} project disclosure exists`);
+      const summary = projectSection[1].match(/<summary class="project-summary">([\s\S]*?)<\/summary>/);
+      assert.ok(summary, `${project} project summary exists`);
+      assert.match(summary[1], new RegExp(`<span class="project-line">${description.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}</span>`));
+    }
+  };
+  assertProjectDescriptions(html);
+  const [synapseDescription, juneDescription] = productDescriptions.map(([, description]) => description);
+  const swappedDescriptions = html.replace(synapseDescription, '__SWAPPED_DESCRIPTION__').replace(juneDescription, synapseDescription).replace('__SWAPPED_DESCRIPTION__', juneDescription);
+  assert.throws(() => assertProjectDescriptions(swappedDescriptions), /project-line/);
+  assert.doesNotMatch(html, /I own the product direction/i);
   assert.doesNotMatch(html, /Auburn|rÃ©sumÃ©|resume/i);
 });
 
