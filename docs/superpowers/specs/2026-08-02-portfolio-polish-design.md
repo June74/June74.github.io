@@ -1,6 +1,6 @@
 # Portfolio hero and diagram polish design
 
-- Status: approved visual direction; awaiting written-spec review
+- Status: approved by owner for implementation on 2026-08-02
 - Owner: Injun Lee
 - Date: 2026-08-02
 - Supersedes: only the affected hero typography and June task-sequence details in `2026-08-01-personal-work-showcase-design.md`
