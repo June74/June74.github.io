@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-02 00:14 CDT
-- Last observed: 2026-08-02 01:51 CDT
+- Last observed: 2026-08-02 11:59 CDT
 - Phase/task: Task 6 integrated browser acceptance
 - Environment: Codex in-app browser and Windows PowerShell
 - Version/commit: `783ec53`
@@ -33,6 +33,21 @@ During the 2026-08-02 portfolio-polish pass, a previously claimed preview-tab bi
 
 The recovered check confirmed that all four June task markers begin empty, progress monotonically from zero to four completed markers, reset to zero after close and reopen, and generate no browser warnings or errors. This recurrence is closed without a product-code change.
 
+## Recurrence during public-URL acceptance
+
+After GitHub Pages deployed merge `02ef82b`, the first controlled pointer click intended to open June left both June and Synapse closed. The deployed hero and Synapse checks had already passed, the page console remained clean, and no page state or source was mutated by the probe. The discrepancy is contained to the acceptance action while the exact event sequence is reproduced and compared with the already-passing keyboard and local-browser paths.
+
+- Confirmed: the first recorded post-click snapshot showed June closed and all four markers in their static completed state.
+- Hypothesis: the controlled pointer action crossed the project's `pointerleave` preview boundary during auto-scroll and closed a transient preview before the snapshot.
+- Known exclusion: this is not a stale deployment; the public page contains the new hero signature and outlined Synapse router, and the workflow deployed merge `02ef82b` successfully.
+
+The controlled public tab later disappeared from the browser's open-tab inventory and a subsequent pointer probe on that released binding timed out before reaching the selector. A fresh public tab then opened June with one pointer click, left it pinned and animating, and showed all four markers empty. The keyboard path independently opened June, completed the four markers in order, closed it, and replayed from zero.
+
+- Confirmed cause: the acceptance harness continued using an unstable tab binding after a long chained interaction; the public artifact was not the failing boundary.
+- Rejected hypothesis: the deployed June pointer interaction was broken. A fresh public-tab pointer activation and a separate keyboard activation both exercised the expected behavior.
+- Correction: reacquire or recreate the public tab after a controlled tab disappears or a CDP selector command times out; keep each interaction probe bounded.
+- Verification: the fresh pointer path opened June with zero completed markers, the timed keyboard replay progressed from zero to four, the browser console stayed clean, and the live responsive checks had no horizontal overflow.
+
 ## Next diagnostic step
 
-None. Keep browser probes grounded in a fresh DOM snapshot, inspect a newly claimed wrapper before reuse, and use the constrained browser API documentation.
+None. Use a fresh claimed tab for each bounded public-URL interaction sequence and discard released bindings immediately.
