@@ -10,3 +10,4 @@
 | SB-2026-08-01-006 | closed | 2026-08-01 21:28 CDT | Git identity diagnostic exposed a private email |
 | SB-2026-08-01-007 | closed | 2026-08-01 21:30 CDT | Staged design baseline failed whitespace validation |
 | SB-2026-08-01-008 | closed | 2026-08-01 21:46 CDT | Worktree creation blocked by Git ownership check |
+| SB-2026-08-01-009 | closed | 2026-08-01 21:50 CDT | Task-brief helper cannot locate awk |
