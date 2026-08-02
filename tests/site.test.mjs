@@ -8,7 +8,12 @@ const root = path.resolve(import.meta.dirname, '..');
 const siteDir = path.join(root, 'site');
 const readSite = (name) => readFile(path.join(siteDir, name), 'utf8');
 const cspPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'none'";
-const urlAttributeNames = new Set(['href', 'src', 'action', 'formaction', 'poster', 'srcset', 'xlink:href']);
+const urlAttributeNames = new Set([
+  'action', 'archive', 'attributionsrc', 'background', 'cite', 'classid', 'code', 'codebase', 'data',
+  'datasrc', 'dynsrc', 'formaction', 'href', 'icon', 'imagesrcset', 'itemid', 'longdesc', 'lowsrc',
+  'manifest', 'ping', 'poster', 'profile', 'src', 'srcset', 'usemap', 'xlink:href', 'xml:base',
+]);
+const urlListAttributeNames = new Set(['archive', 'attributionsrc', 'ping']);
 const allowedLocalUrls = new Set(['assets/favicon.svg', 'styles.css', 'script.js']);
 const approvedColorProperties = new Map([
   ['paper', '#f1eee6'],
@@ -99,26 +104,98 @@ function assertApprovedMetadata(html) {
   assert.equal(singleAttribute(referrerMetadata[0], 'content'), 'no-referrer');
 }
 
+function assertApprovedHeadElements(html) {
+  assertApprovedMetadata(html);
+  const tags = parseStartTags(html);
+  const metadata = tags.filter((tag) => tag.name === 'meta');
+  const counts = new Map([['charset', 0], ['content-security-policy', 0], ['referrer', 0], ['viewport', 0], ['description', 0]]);
+
+  for (const tag of metadata) {
+    const charsetValues = attributeValues(tag, 'charset');
+    const httpEquivValues = attributeValues(tag, 'http-equiv').map((value) => value && decodeTextEntities(value).toLowerCase());
+    const nameValues = attributeValues(tag, 'name').map((value) => value && decodeTextEntities(value).toLowerCase());
+    const discriminatorCount = [charsetValues.length, httpEquivValues.length, nameValues.length].filter(Boolean).length;
+    assert.equal(discriminatorCount, 1, 'each meta tag must have exactly one approved discriminator');
+
+    if (charsetValues.length) {
+      assert.deepEqual(new Set(tag.attributes.map((attribute) => attribute.name)), new Set(['charset']));
+      assert.equal(singleAttribute(tag, 'charset').toLowerCase(), 'utf-8');
+      counts.set('charset', counts.get('charset') + 1);
+      continue;
+    }
+
+    if (httpEquivValues.length) {
+      assert.notEqual(httpEquivValues[0], 'refresh', 'meta refresh is prohibited');
+      assert.deepEqual(new Set(tag.attributes.map((attribute) => attribute.name)), new Set(['http-equiv', 'content']));
+      assert.equal(httpEquivValues.length, 1);
+      assert.equal(httpEquivValues[0], 'content-security-policy');
+      assert.equal(singleAttribute(tag, 'content'), cspPolicy);
+      counts.set('content-security-policy', counts.get('content-security-policy') + 1);
+      continue;
+    }
+
+    assert.deepEqual(new Set(tag.attributes.map((attribute) => attribute.name)), new Set(['name', 'content']));
+    assert.equal(nameValues.length, 1);
+    assert.ok(['referrer', 'viewport', 'description'].includes(nameValues[0]), `unapproved meta name: ${nameValues[0]}`);
+    const content = singleAttribute(tag, 'content');
+    assert.ok(content.length > 0, `${nameValues[0]} metadata must not be empty`);
+    if (nameValues[0] === 'referrer') assert.equal(content, 'no-referrer');
+    counts.set(nameValues[0], counts.get(nameValues[0]) + 1);
+  }
+  for (const [kind, count] of counts) assert.equal(count, 1, `document must contain exactly one ${kind} meta tag`);
+
+  const links = tags.filter((tag) => tag.name === 'link');
+  assert.equal(links.length, 2, 'document must contain exactly the approved icon and stylesheet links');
+  const linkKinds = [];
+  for (const link of links) {
+    const relation = singleAttribute(link, 'rel').toLowerCase();
+    const href = singleAttribute(link, 'href');
+    if (relation === 'icon') {
+      assert.deepEqual(new Set(link.attributes.map((attribute) => attribute.name)), new Set(['rel', 'href', 'type']));
+      assert.equal(href, 'assets/favicon.svg');
+      assert.equal(singleAttribute(link, 'type'), 'image/svg+xml');
+    } else {
+      assert.equal(relation, 'stylesheet');
+      assert.deepEqual(new Set(link.attributes.map((attribute) => attribute.name)), new Set(['rel', 'href']));
+      assert.equal(href, 'styles.css');
+    }
+    linkKinds.push(relation);
+  }
+  assert.deepEqual(new Set(linkKinds), new Set(['icon', 'stylesheet']));
+}
+
 function assertAllowedUrl(value, tagName, attributeName) {
   const context = `<${tagName}> ${attributeName}`;
   assert.equal(typeof value, 'string', `${context} requires a value`);
-  const isFragment = value.length > 1 && value.startsWith('#');
-  const isApprovedLocalUrl = allowedLocalUrls.has(value);
-  const isApprovedGitHubUrl = tagName === 'a' && attributeName === 'href' && value === 'https://github.com/June74';
-  assert.ok(isFragment || isApprovedLocalUrl || isApprovedGitHubUrl, `${context} has unapproved URL: ${value}`);
+  const decodedValue = decodeTextEntities(value);
+  const isFragment = decodedValue.length > 1 && decodedValue.startsWith('#');
+  const isApprovedLocalUrl = allowedLocalUrls.has(decodedValue);
+  const isApprovedGitHubUrl = tagName === 'a' && attributeName === 'href' && decodedValue === 'https://github.com/June74';
+  assert.ok(isFragment || isApprovedLocalUrl || isApprovedGitHubUrl, `${context} has unapproved URL: ${decodedValue}`);
 }
 
 function assertApprovedUrls(html) {
   for (const tag of parseStartTags(html)) {
     for (const attribute of tag.attributes) {
-      if (!urlAttributeNames.has(attribute.name)) continue;
-      if (attribute.name === 'srcset') {
-        assert.equal(typeof attribute.value, 'string', `<${tag.name}> srcset requires a value`);
-        const candidates = attribute.value.split(',').map((candidate) => candidate.trim().split(/\s+/)[0]);
-        assert.ok(candidates.length > 0 && candidates.every(Boolean), `<${tag.name}> has an empty srcset candidate`);
-        for (const candidate of candidates) assertAllowedUrl(candidate, tag.name, 'srcset');
-      } else {
-        assertAllowedUrl(attribute.value, tag.name, attribute.name);
+      const decodedValue = typeof attribute.value === 'string' ? decodeTextEntities(attribute.value) : attribute.value;
+      if (attribute.name === 'srcset' || attribute.name === 'imagesrcset') {
+        assert.equal(typeof decodedValue, 'string', `<${tag.name}> ${attribute.name} requires a value`);
+        const candidates = decodedValue.split(',').map((candidate) => candidate.trim().split(/\s+/)[0]);
+        assert.ok(candidates.length > 0 && candidates.every(Boolean), `<${tag.name}> has an empty ${attribute.name} candidate`);
+        for (const candidate of candidates) assertAllowedUrl(candidate, tag.name, attribute.name);
+      } else if (urlListAttributeNames.has(attribute.name)) {
+        assert.equal(typeof decodedValue, 'string', `<${tag.name}> ${attribute.name} requires a value`);
+        const urls = decodedValue.trim().split(/\s+/).filter(Boolean);
+        assert.ok(urls.length > 0, `<${tag.name}> ${attribute.name} requires at least one URL`);
+        for (const url of urls) assertAllowedUrl(url, tag.name, attribute.name);
+      } else if (urlAttributeNames.has(attribute.name)) {
+        assertAllowedUrl(decodedValue, tag.name, attribute.name);
+      }
+
+      if (typeof decodedValue === 'string') {
+        for (const match of decodedValue.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)]+))\s*\)/gi)) {
+          assertAllowedUrl(match[1] ?? match[2] ?? match[3], tag.name, attribute.name);
+        }
       }
     }
   }
@@ -135,7 +212,7 @@ function assertApprovedOutboundAnchors(html) {
 }
 
 function assertStaticHtmlElements(html) {
-  const prohibitedTags = new Set(['style', 'form', 'iframe', 'object', 'embed']);
+  const prohibitedTags = new Set(['applet', 'base', 'embed', 'form', 'frame', 'frameset', 'iframe', 'object', 'style']);
   for (const tag of parseStartTags(html)) {
     assert.equal(prohibitedTags.has(tag.name), false, `<${tag.name}> is prohibited`);
     for (const attribute of tag.attributes) {
@@ -225,19 +302,64 @@ function assertApprovedColors(css) {
 }
 
 function decodeTextEntities(source) {
-  const named = { amp: '&', apos: "'", gt: '>', lt: '<', nbsp: ' ', quot: '"' };
+  const named = { amp: '&', apos: "'", colon: ':', equals: '=', gt: '>', lt: '<', newline: '\n', nbsp: ' ', num: '#', period: '.', quest: '?', quot: '"', sol: '/', tab: '\t' };
   return source
     .replace(/&#x([0-9a-f]+);/gi, (_, value) => String.fromCodePoint(Number.parseInt(value, 16)))
     .replace(/&#([0-9]+);/g, (_, value) => String.fromCodePoint(Number.parseInt(value, 10)))
-    .replace(/&(amp|apos|gt|lt|nbsp|quot);/gi, (_, name) => named[name.toLowerCase()]);
+    .replace(/&(amp|apos|colon|equals|gt|lt|newline|nbsp|num|period|quest|quot|sol|tab);/gi, (_, name) => named[name.toLowerCase()]);
+}
+
+const draftMarkerPattern = /\b(?:TODO|TBD|FIXME)\b|lorem ipsum|example\.com|\bdraft(?: copy| content| text| implementation)?\b|\bplaceholder\b/i;
+
+function extractCodeComments(source, includeLineComments) {
+  const comments = [];
+  let position = 0;
+  let quote = null;
+  while (position < source.length) {
+    const character = source[position];
+    const next = source[position + 1];
+    if (quote) {
+      if (character === '\\') position += 2;
+      else {
+        if (character === quote) quote = null;
+        position += 1;
+      }
+    } else if (character === '"' || character === "'") {
+      quote = character;
+      position += 1;
+    } else if (character === '/' && next === '*') {
+      const closing = source.indexOf('*/', position + 2);
+      comments.push(source.slice(position + 2, closing === -1 ? source.length : closing));
+      position = closing === -1 ? source.length : closing + 2;
+    } else if (includeLineComments && character === '/' && next === '/') {
+      const closing = source.indexOf('\n', position + 2);
+      comments.push(source.slice(position + 2, closing === -1 ? source.length : closing));
+      position = closing === -1 ? source.length : closing + 1;
+    } else {
+      position += 1;
+    }
+  }
+  return comments;
+}
+
+function assertNoDraftComments(file, source) {
+  let comments;
+  if (file.endsWith('.html') || file.endsWith('.svg')) {
+    comments = [...source.matchAll(/<!--([\s\S]*?)-->/g)].map((match) => match[1]);
+    if (file.endsWith('.html')) {
+      for (const match of source.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) comments.push(...extractCodeComments(match[1], true));
+      for (const match of source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) comments.push(...extractCodeComments(match[1], false));
+    }
+  } else {
+    comments = extractCodeComments(source, file.endsWith('.js'));
+  }
+  assert.doesNotMatch(decodeTextEntities(comments.join('\n')), draftMarkerPattern);
 }
 
 function assertNoDraftContent(html) {
-  const marker = /\b(?:TODO|TBD|FIXME)\b|lorem ipsum|example\.com|\bdraft(?: copy| content| text)?\b|\bplaceholder\b/i;
-  const comments = [...html.matchAll(/<!--([\s\S]*?)-->/g)].map((match) => decodeTextEntities(match[1])).join('\n');
   const renderedText = decodeTextEntities(html.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, ' '));
-  assert.doesNotMatch(comments, marker);
-  assert.doesNotMatch(renderedText, marker);
+  assertNoDraftComments('index.html', html);
+  assert.doesNotMatch(renderedText, draftMarkerPattern);
 
   for (const tag of parseStartTags(html)) {
     for (const attribute of tag.attributes) {
@@ -489,7 +611,7 @@ test('artifact manifest and size stay inside the approved budget', async () => {
 
 test('HTML enforces the approved static security boundary', async () => {
   const html = await readSite('index.html');
-  assertApprovedMetadata(html);
+  assertApprovedHeadElements(html);
   assertApprovedUrls(html);
   assertStaticHtmlElements(html);
 });
@@ -498,7 +620,10 @@ test('public artifact has no draft markers or prohibited personal content', asyn
   const files = await listFiles(siteDir);
   const contents = await Promise.all(files.map((file) => readFile(path.join(siteDir, file), 'utf8')));
   const artifact = contents.join('\n');
-  for (let index = 0; index < files.length; index += 1) assertApprovedRemoteUrls(files[index], contents[index]);
+  for (let index = 0; index < files.length; index += 1) {
+    assertApprovedRemoteUrls(files[index], contents[index]);
+    assertNoDraftComments(files[index], contents[index]);
+  }
   assertNoDraftContent(await readSite('index.html'));
   assertNoSecrets(artifact);
   assertNoPrivateEndpoints(artifact);
@@ -594,4 +719,33 @@ test('review mutation: implementation identifiers are not draft copy', () => {
 test('review mutation: the approved todo component identifier remains intact', async () => {
   assert.match(await readSite('index.html'), /class="todo-card"/);
   assert.match(await readSite('styles.css'), /\.todo-card\b/);
+});
+
+test('re-review mutation: ping, legacy, and SVG URL attributes are validated', () => {
+  assert.throws(() => assertApprovedUrls('<a href="#work" ping="//evil.test/track">work</a>'));
+  assert.throws(() => assertApprovedUrls('<a href="#work" ping="&sol;&sol;evil.test/track">work</a>'));
+  assert.throws(() => assertApprovedUrls('<object data="//evil.test/file"></object>'));
+  assert.throws(() => assertApprovedUrls('<blockquote cite="https://evil.test/source">copy</blockquote>'));
+  assert.throws(() => assertApprovedUrls('<img attributionsrc="assets/favicon.svg //evil.test/register">'));
+  assert.throws(() => assertApprovedUrls('<link imagesrcset="assets/favicon.svg 1x, //evil.test/image 2x">'));
+  assert.throws(() => assertApprovedUrls('<svg><rect fill="url(//evil.test/fill.svg#paint)"></rect></svg>'));
+});
+
+test('re-review mutation: refresh metadata and unapproved link relations are rejected', async () => {
+  const html = await readSite('index.html');
+  assert.doesNotThrow(() => assertApprovedHeadElements(html));
+  const inject = (markup) => html.replace('</head>', `${markup}</head>`);
+  assert.throws(() => assertApprovedHeadElements(inject('<meta content="0; url=//evil.test" http-equiv="refresh">')));
+  assert.throws(() => assertApprovedHeadElements(inject('<META HTTP-EQUIV=REFRESH CONTENT="0;url=//evil.test">')));
+  assert.throws(() => assertApprovedHeadElements(inject('<meta content="0;url=&#47;&#47;evil.test" http-equiv="re&#102;resh">')));
+  assert.throws(() => assertApprovedHeadElements(inject('<link href=script.js rel=preload>')));
+});
+
+test('re-review mutation: draft comments are rejected in every public source type', () => {
+  assert.doesNotThrow(() => assertNoDraftComments('styles.css', '.todo-card { display: block; }'));
+  assert.doesNotThrow(() => assertNoDraftComments('script.js', 'const visibleLabel = "To-do";'));
+  assert.throws(() => assertNoDraftComments('styles.css', '/* TODO: replace color */'));
+  assert.throws(() => assertNoDraftComments('script.js', '// FIXME: replace behavior'));
+  assert.throws(() => assertNoDraftComments('script.js', '/* draft implementation */'));
+  assert.throws(() => assertNoDraftComments('assets/favicon.svg', '<!-- TODO: replace icon --><svg></svg>'));
 });
