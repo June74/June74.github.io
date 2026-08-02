@@ -1,6 +1,6 @@
 # Predeployment evidence checklist
 
-This checklist records local readiness evidence. It is not authority to create a repository, push, enable GitHub Pages, or represent the site as publicly released. Each unchecked item requires a dated evidence link or note before deployment authorization.
+This checklist records only local and predeployment evidence before explicit owner deployment authorization. It is not authority to create a repository, push, enable GitHub Pages, or represent the site as publicly released.
 
 - [ ] **Commit** — candidate commit SHA and subject:
 - [ ] **Tests** — `node --check site/script.js` and `node --test tests/site.test.mjs` output:
@@ -19,7 +19,7 @@ This checklist records local readiness evidence. It is not authority to create a
 
 ## Post-authorization live-URL acceptance
 
-Complete this section only after explicit owner deployment authorization. These checks use the actual public URL and cannot be filled by local preview.
+Complete this section only after explicit owner deployment authorization and the authorized deployment. These checks use the actual public URL and cannot be filled by local preview. All post-authorization live-URL items must have evidence before the release is called accepted or publicly verified.
 
 - [ ] **Actual public URL availability** — public URL resolves to the intended site:
 - [ ] **HTTPS and expected redirects** — HTTPS is valid and redirects match the approved deployment path:

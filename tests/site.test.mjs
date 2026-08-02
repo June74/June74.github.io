@@ -823,3 +823,12 @@ test('predeployment checklist separates post-authorization live-URL acceptance f
   assert.match(checklist, /unexpected network requests/i);
   assert.match(checklist, /final URL\/artifact confirmation/i);
 });
+
+test('predeployment checklist enforces the local-to-authorized-live acceptance order', async () => {
+  const checklist = await readFile(path.join(root, 'docs', 'release', 'predeployment-checklist.md'), 'utf8');
+  assert.match(checklist, /This checklist records only local and predeployment evidence before explicit owner deployment authorization\./);
+  const authorizationGate = checklist.indexOf('**Explicit deployment authorization**');
+  const liveAcceptance = checklist.indexOf('## Post-authorization live-URL acceptance');
+  assert.ok(authorizationGate >= 0 && authorizationGate < liveAcceptance, 'explicit authorization must precede live-URL acceptance');
+  assert.match(checklist, /All post-authorization live-URL items must have evidence before the release is called accepted or publicly verified\./);
+});
