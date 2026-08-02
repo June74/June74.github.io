@@ -426,6 +426,27 @@ test('June and MM figures expose substantive descriptions through their captions
   }
 });
 
+test('MM sample spending values reconcile with the weekly budget', async () => {
+  const html = await readSite('index.html');
+  const figure = html.match(/<figure class="project-visual mm-visual"[\s\S]*?<\/figure>/);
+  assert.ok(figure, 'MM figure is present');
+
+  const dailyValues = figure[0].match(/<svg class="spending-chart" data-daily-spending="([\d ]+)"/);
+  assert.ok(dailyValues, 'MM chart declares its seven daily spending values');
+  const spending = dailyValues[1].trim().split(/\s+/).map(Number);
+  assert.equal(spending.length, 7, 'MM chart has one spending value for each day');
+
+  const weeklyTotal = figure[0].match(/This week · \$(\d+)/);
+  const budget = figure[0].match(/Weekly plan: \$(\d+) · spent: \$(\d+)[\s\S]*?<strong>\$(\d+) remaining<\/strong>/);
+  assert.ok(weeklyTotal, 'MM chart displays a weekly total');
+  assert.ok(budget, 'MM chart displays plan, spent, and remaining amounts');
+
+  const [, planned, spent, remaining] = budget.map(Number);
+  assert.equal(spending.reduce((total, value) => total + value, 0), spent);
+  assert.equal(Number(weeklyTotal[1]), spent);
+  assert.equal(planned - spent, remaining);
+});
+
 test('only approved outbound links are present', async () => {
   const html = await readSite('index.html');
   assertApprovedOutboundAnchors(html);
