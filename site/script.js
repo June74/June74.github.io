@@ -46,16 +46,30 @@ function togglePinned(project) {
 
 for (const project of projects) {
   const summary = project.querySelector('.project-summary');
+  let suppressKeyboardClick = false;
 
   summary.addEventListener('click', (event) => {
     event.preventDefault();
+    if (suppressKeyboardClick) {
+      suppressKeyboardClick = false;
+      return;
+    }
     togglePinned(project);
   });
 
   summary.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
+    suppressKeyboardClick = true;
     togglePinned(project);
+  });
+
+  summary.addEventListener('keyup', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    setTimeout(() => {
+      suppressKeyboardClick = false;
+    }, 0);
   });
 
   project.addEventListener('pointerenter', () => previewProject(project));

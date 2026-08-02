@@ -562,6 +562,7 @@ test('enhancement applies progressive disclosure states and keyboard activation 
 
   vm.runInNewContext(js, {
     document: { querySelectorAll: () => projects },
+    setTimeout,
     window: { matchMedia: () => fineHover },
   });
 
@@ -611,26 +612,45 @@ test('enhancement applies progressive disclosure states and keyboard activation 
   projects[2].dispatch('pointerenter');
   assert.equal(projects[2].open, false);
 
-  const enterOpen = projects[0].summary.dispatch('keydown', { key: 'Enter' });
+  projects[0].summary.dispatch('click');
+  const enterOpen = projects[1].summary.dispatch('keydown', { key: 'Enter' });
+  const enterOpenClick = projects[1].summary.dispatch('click', { detail: 0 });
+  const enterOpenKeyup = projects[1].summary.dispatch('keyup', { key: 'Enter' });
   assert.equal(enterOpen.defaultPrevented, true);
-  assert.equal(projects[0].open, true);
-  assert.equal(projects[0].classList.contains('is-pinned'), true);
-
-  const enterClose = projects[0].summary.dispatch('keydown', { key: 'Enter' });
-  assert.equal(enterClose.defaultPrevented, true);
+  assert.equal(enterOpenClick.defaultPrevented, true);
+  assert.equal(enterOpenKeyup.defaultPrevented, true);
   assert.equal(projects[0].open, false);
   assert.equal(projects[0].classList.contains('is-pinned'), false);
+  assert.equal(projects[1].open, true);
+  assert.equal(projects[1].classList.contains('is-pinned'), true);
+
+  const enterClose = projects[1].summary.dispatch('keydown', { key: 'Enter' });
+  const enterCloseClick = projects[1].summary.dispatch('click', { detail: 0 });
+  const enterCloseKeyup = projects[1].summary.dispatch('keyup', { key: 'Enter' });
+  assert.equal(enterClose.defaultPrevented, true);
+  assert.equal(enterCloseClick.defaultPrevented, true);
+  assert.equal(enterCloseKeyup.defaultPrevented, true);
+  assert.equal(projects[1].open, false);
+  assert.equal(projects[1].classList.contains('is-pinned'), false);
 
   projects[0].summary.dispatch('click');
   const spaceOpen = projects[1].summary.dispatch('keydown', { key: ' ' });
+  const spaceOpenKeyup = projects[1].summary.dispatch('keyup', { key: ' ' });
+  const spaceOpenClick = projects[1].summary.dispatch('click', { detail: 0 });
   assert.equal(spaceOpen.defaultPrevented, true);
+  assert.equal(spaceOpenKeyup.defaultPrevented, true);
+  assert.equal(spaceOpenClick.defaultPrevented, true);
   assert.equal(projects[0].open, false);
   assert.equal(projects[0].classList.contains('is-pinned'), false);
   assert.equal(projects[1].open, true);
   assert.equal(projects[1].classList.contains('is-pinned'), true);
 
   const spaceClose = projects[1].summary.dispatch('keydown', { key: ' ' });
+  const spaceCloseKeyup = projects[1].summary.dispatch('keyup', { key: ' ' });
+  const spaceCloseClick = projects[1].summary.dispatch('click', { detail: 0 });
   assert.equal(spaceClose.defaultPrevented, true);
+  assert.equal(spaceCloseKeyup.defaultPrevented, true);
+  assert.equal(spaceCloseClick.defaultPrevented, true);
   assert.equal(projects[1].open, false);
   assert.equal(projects[1].classList.contains('is-pinned'), false);
 
