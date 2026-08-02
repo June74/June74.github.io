@@ -1,4 +1,4 @@
-# Injun Lee — personal work showcase
+# Personal work showcase
 
 A dependency-free static site presenting Injun Lee through three human-centered AI systems.
 
