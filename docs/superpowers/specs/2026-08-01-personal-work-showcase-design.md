@@ -2,7 +2,7 @@
 
 - Owner: Injun Lee
 - Continuity owner: Primary agent (Agent 5)
-- Status: In review
+- Status: Approved
 - Last reviewed: 2026-08-01
 - Upstream decision: Full-page visual design Revision 9 approved by the owner on 2026-08-01
 - Downstream consumers: implementation plan, developers, product review, security review, release acceptance
@@ -15,9 +15,9 @@
 | Product alignment | Agent 2 | Pass | 2026-08-01 final review; person-first copy, honest claims, contribution statements, work navigation, and first-release exceptions verified | Owner must approve the revised written copy and exceptions |
 | Security design | Agent 1 | Pass for design | 2026-08-01 final review; curated artifact, exact meta CSP, hosting privacy limitation, SVG subset, and history review verified | Pin and review GitHub-owned workflow actions during implementation; complete pre-publication evidence |
 | Continuity | Agent 5 | Pass | 2026-08-01 final review; native disclosure states, durable visual reference, staged release, rollback, performance, and draft-marker contracts verified | Owner approval changes this specification from `In review` to `Approved` |
-| Implementation authorization | Site owner | Blocked | This specification remains `In review` | Review and approve this written specification |
+| Implementation authorization | Site owner | Approved | Owner approved the written specification on 2026-08-01 | Create the implementation plan and begin reviewed development slices |
 
-The visual approval does not by itself approve the added technical, security, interaction-state, or release decisions. No product code may be implemented while the final row remains blocked.
+The visual approval did not by itself approve the added technical, security, interaction-state, or release decisions. The owner subsequently approved this written specification, which authorizes local implementation but does not authorize a public repository push or deployment.
 
 ## 1. Purpose
 
