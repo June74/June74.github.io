@@ -4,10 +4,10 @@ This record captures local release-candidate observations only. It does not prov
 
 - Evidence date: 2026-08-02 (CDT)
 - Browser-observation reference: `12fd68c` (`fix: reconcile MM sample spending`), including keyboard hardening from `8411a27`
-- Review note: the independent keyboard review approved the hardened behavior; independent MM review remains pending
+- Review note: the independent keyboard review approved the hardened behavior; the independent MM review approved the reconciled contract after `3f5c0d7`
 - Preview origin: `http://127.0.0.1:8000/`
 - Browser: controlled Codex in-app Chromium browser; the exact browser version was not exposed in the recorded session
-- Current disposition: browser and automated checks for `12fd68c` passed; release acceptance remains open for independent MM review and the remaining predeployment and public-release gates below
+- Current disposition: browser checks through `12fd68c` and automated checks at `d0cf706` passed. Integrated product acceptance remains open because product review identified contrast/CSS items that are under active correction and still require an independently reviewed commit plus refreshed evidence
 - **Public deployment not authorized**
 
 ## Served artifact
@@ -51,11 +51,12 @@ The approved implementation supports narrower widths through CSS, but this evide
 
 ## Automated verification
 
-At `12fd68c`, `node --check site/script.js` passed and `node --test tests/site.test.mjs` reported 28 passing tests with no failures, skips, cancellations, or todo tests. `git diff --check` completed without a content error; its only output was line-ending warnings for unrelated, pre-existing setback-record changes.
+At `d0cf706`, `node --check site/script.js` passed and `node --test tests/site.test.mjs` reported 30 passing tests with no failures, skips, cancellations, or todo tests. `git diff --check` completed without a content error.
 
 ## Checks not yet closed
 
-- Complete and record the independent MM review.
+- Complete the active contrast/CSS correction, independently review its exact commit, and refresh the automated and browser evidence against that integrated candidate.
+- Complete the five-participant validation recorded as pending in `docs/release/product-validation.md`; no participant results have been collected yet.
 - Record a Lighthouse run and tool version if it remains part of the release gate.
 - Complete any native-browser gaps required by the final release decision, including reduced-motion emulation, hover replay, and JavaScript-disabled behavior where the available tooling permits them.
 - Complete the owner review of public copy, metadata, and the release commit.
