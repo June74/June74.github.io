@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-02 00:14 CDT
-- Last observed: 2026-08-02 00:25 CDT
+- Last observed: 2026-08-02 01:51 CDT
 - Phase/task: Task 6 integrated browser acceptance
 - Environment: Codex in-app browser and Windows PowerShell
 - Version/commit: `783ec53`
@@ -27,6 +27,12 @@ The checker took a fresh DOM snapshot, rebuilt selectors from the production sem
 
 Desktop evidence was collected at 1440 by 1000, mobile evidence at 390 by 844, and tablet evidence at 820 by 1000. Each measured viewport reported equal document client and scroll widths, confirming no horizontal overflow.
 
+## Recurrence during portfolio-polish acceptance
+
+During the 2026-08-02 portfolio-polish pass, a previously claimed preview-tab binding was released before the June timing check, and the first replacement probe called `locator()` on the tab wrapper instead of its documented `playwright` surface. The page remained running and unchanged. The checker reclaimed the existing `127.0.0.1:8000` tab, inspected the wrapper before retrying, and then used `tab.playwright.locator()` and `tab.playwright.evaluate()`.
+
+The recovered check confirmed that all four June task markers begin empty, progress monotonically from zero to four completed markers, reset to zero after close and reopen, and generate no browser warnings or errors. This recurrence is closed without a product-code change.
+
 ## Next diagnostic step
 
-None. Keep browser probes grounded in a fresh DOM snapshot and the constrained browser API documentation.
+None. Keep browser probes grounded in a fresh DOM snapshot, inspect a newly claimed wrapper before reuse, and use the constrained browser API documentation.
