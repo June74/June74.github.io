@@ -541,6 +541,14 @@ test('Synapse entry nodes reuse the selected and answer treatments', async () =>
   assert.equal(cssProperty(css, '.router-box', 'stroke'), cssProperty(css, '.answer-box', 'stroke'));
   assert.equal(cssProperty(css, '.router-label', 'fill'), 'var(--forest) !important');
   assert.equal(cssProperty(css, '.router-subtitle', 'fill'), '#596159 !important');
+
+  assert.match(html, /<path class="route route-inbound route-selected" d="M130 110 C151 110 161 110 181 110"\/>/);
+  assert.match(html, /<path class="route route-b route-selected" d="M267 110 C290 92 304 76 330 75"\/>/);
+  assert.match(html, /<path class="route route-answer route-selected" d="M406 75 C427 75 438 95 456 103"\/>/);
+  assert.equal(cssProperty(css, '.route-selected', 'stroke'), 'var(--copper)');
+  assert.equal(cssProperty(css, '.route-b.route-selected', 'stroke'), 'var(--forest)');
+  assert.equal(cssProperty(css, '.route-b.route-selected', 'stroke'), cssProperty(css, '.router-box', 'stroke'));
+  assert.doesNotMatch(css, /\.route-(?:inbound|answer)\.route-selected\s*\{[^}]*stroke\s*:/i);
 });
 
 test('June animates all four completion markers in sequence', async () => {
