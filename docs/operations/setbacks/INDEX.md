@@ -6,7 +6,7 @@
 | [SB-20260802-055458-setback-index-table-format](incidents/2026-08-02T055458Z-setback-index-table-format.md) | closed | 2026-08-02T05:54:58Z | Setback helper rejected the repository index table format |
 | SB-2026-08-01-001 | closed | 2026-08-01 18:49 CDT | Skill root expanded incorrectly during discovery |
 | SB-2026-08-01-002 | closed | 2026-08-02 00:14 CDT | WinGet ripgrep shim could not execute |
-| SB-2026-08-01-003 | closed | 2026-08-01 21:19 CDT | Visual companion shell launcher unavailable on Windows |
+| SB-2026-08-01-003 | closed | 2026-08-02 01:20 CDT | Visual companion shell launcher unavailable on Windows |
 | SB-2026-08-01-004 | closed | 2026-08-01 21:21 CDT | Git cannot read user-level ignore file |
 | SB-2026-08-01-005 | contained | 2026-08-01 21:21 CDT | Direct GitHub Pages preflight returned cache miss |
 | SB-2026-08-01-006 | closed | 2026-08-01 21:28 CDT | Git identity diagnostic exposed a private email |
