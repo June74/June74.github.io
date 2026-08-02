@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Injun Lee shapes human-centered AI systems through product direction, agent orchestration, and careful software engineering.">
+  <title>Injun Lee — AI Systems</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#current-work">Skip to current work</a>
+  <main class="site-shell">
+    <nav class="site-nav" aria-label="Primary">
+      <a class="identity" href="#top">Injun Lee</a>
+      <a href="https://github.com/June74" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+
+    <header class="hero" id="top">
+      <div class="hero-copy">
+        <h1><span>Injun Lee.</span><span>I build AI systems</span><span>around people.</span></h1>
+        <p>I’m a software engineer focused on expanding what AI can do without losing sight of who it should serve. My work centers on AI capabilities and agent orchestration—coordinating systems that can take on large tasks and complex projects. Right now, I’m shaping accessible, affordable products grounded in practical direction and driven by imagination.</p>
+        <a class="hero-jump" href="#current-work">Currently shaping three systems</a>
+      </div>
+      <div class="solar-system" role="img" aria-label="An abstract central intelligence with signals orbiting at several distances">
+        <span class="orbit orbit-four"></span><span class="orbit orbit-three"></span>
+        <span class="orbit orbit-two"></span><span class="orbit orbit-one"></span>
+        <span class="core-halo"></span><span class="core"></span>
+      </div>
+    </header>
+
+    <section class="work-section" id="current-work" aria-labelledby="work-heading">
+      <div class="section-heading"><h2 id="work-heading">Current work</h2><p>Three systems I’m shaping</p></div>
+
+      <details class="project" data-project="synapse">
+        <summary class="project-summary">
+          <span class="project-number">01</span>
+          <span class="project-copy"><span class="project-name">Synapse</span><span class="project-line">I own the product direction and routing design for a system that pairs each prompt with the model best suited to it.</span><span class="topics"><span>AI routing</span><span>Product direction</span><span>System design</span></span></span>
+          <span class="project-plus" aria-hidden="true">+</span>
+        </summary>
+        <div class="project-panel">
+          <figure class="project-visual synapse-visual" aria-labelledby="synapse-caption">
+            <figcaption id="synapse-caption"><span>A glimpse of the routing flow</span><span>Illustrative system view</span></figcaption>
+            <svg class="synapse-diagram" viewBox="0 0 570 220" role="img" aria-label="A prompt enters a router, four aligned model choices appear, and one selected model produces an answer">
+              <rect class="diagram-box" x="18" y="82" width="112" height="56" rx="9"/>
+              <text x="33" y="103" class="diagram-label">PROMPT</text><text x="33" y="122">Plan my week...</text>
+              <path class="route route-inbound route-selected" d="M130 110 C151 110 161 110 181 110"/>
+              <rect class="router-box" x="181" y="72" width="86" height="76" rx="12"/>
+              <text x="202" y="105" class="router-label">ROUTER</text><text x="196" y="123" class="router-subtitle">analyze · match</text>
+              <path class="route route-a" d="M267 110 C289 74 303 34 330 33"/>
+              <path class="route route-b route-selected" d="M267 110 C290 92 304 76 330 75"/>
+              <path class="route route-c" d="M267 110 C290 117 305 118 330 117"/>
+              <path class="route route-d" d="M267 110 C290 144 305 159 330 159"/>
+              <rect class="diagram-box" x="330" y="18" width="76" height="30" rx="7"/><text x="348" y="37">MODEL A</text>
+              <rect class="model-selected" x="330" y="60" width="76" height="30" rx="7"/><text x="348" y="79" class="diagram-label">MODEL B</text>
+              <rect class="diagram-box" x="330" y="102" width="76" height="30" rx="7"/><text x="348" y="121">MODEL C</text>
+              <rect class="diagram-box" x="330" y="144" width="76" height="30" rx="7"/><text x="348" y="163">MODEL D</text>
+              <path class="route route-answer route-selected" d="M406 75 C427 75 438 95 456 103"/>
+              <rect class="answer-box" x="456" y="78" width="96" height="58" rx="9"/>
+              <text x="472" y="99" class="diagram-label">ANSWER</text><text x="472" y="119" class="answer-copy">Your plan is...</text>
+            </svg>
+          </figure>
+        </div>
+      </details>
+
+      <details class="project" data-project="june">
+        <summary class="project-summary">
+          <span class="project-number">02</span>
+          <span class="project-copy"><span class="project-name">June</span><span class="project-line">I own the product direction and behavior design for an AI secretary built around schedules, tasks, reminders, and follow-through.</span><span class="topics"><span>AI agents</span><span>Calendar</span><span>Task planning</span></span></span>
+          <span class="project-plus" aria-hidden="true">+</span>
+        </summary>
+        <div class="project-panel">
+          <figure class="project-visual june-visual" aria-labelledby="june-caption">
+            <figcaption id="june-caption"><span>A week taking shape</span><span>Calendar and follow-through</span><span class="diagram-description">An illustrative weekly calendar pairs planned events with follow-through tasks.</span></figcaption>
+            <div class="june-layout" aria-hidden="true">
+              <div class="calendar-card"><div class="mini-heading"><span>Weekly calendar</span><span>May 11–15</span></div>
+                <div class="schedule-grid"><span></span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
+                  <span class="time">9:00</span><span class="slot"><span class="calendar-event event-one">Plan week</span></span><span class="slot"></span><span class="slot"><span class="calendar-event copper event-two">Review</span></span><span class="slot"></span><span class="slot"></span>
+                  <span class="time">11:00</span><span class="slot"></span><span class="slot"><span class="calendar-event slate event-three">Focus</span></span><span class="slot"></span><span class="slot"></span><span class="slot"></span>
+                  <span class="time">1:00</span><span class="slot"></span><span class="slot"></span><span class="slot"></span><span class="slot"><span class="calendar-event event-four">Calendar sync</span></span><span class="slot"></span>
+                  <span class="time">3:00</span><span class="slot"></span><span class="slot"></span><span class="slot"></span><span class="slot"></span><span class="slot"><span class="calendar-event copper event-five">Follow-up</span></span>
+                </div>
+              </div>
+              <div class="todo-card"><div class="mini-heading"><span>To-do</span><span>4 items</span></div><p class="task task-one">Confirm appointment</p><p class="task task-two">Prepare weekly plan</p><p class="task">Send follow-up</p><p class="task">Block focus time</p></div>
+            </div>
+          </figure>
+        </div>
+      </details>
+
+      <details class="project" data-project="mm">
+        <summary class="project-summary">
+          <span class="project-number">03</span>
+          <span class="project-copy"><span class="project-name">MM</span><span class="project-line">I own the product direction and behavior design for a system that turns spending patterns into practical reflection.</span><span class="topics"><span>AI analysis</span><span>Personal finance</span><span>Behavior patterns</span></span></span>
+          <span class="project-plus" aria-hidden="true">+</span>
+        </summary>
+        <div class="project-panel">
+          <figure class="project-visual mm-visual" aria-labelledby="mm-caption">
+            <figcaption id="mm-caption"><span>Patterns become practical suggestions</span><span>Illustrative sample values</span><span class="diagram-description">A sample spending chart pairs the weekly budget with practical suggestions.</span></figcaption>
+            <div class="mm-layout" aria-hidden="true">
+              <div class="chart-card"><div class="mini-heading"><span>Daily spending</span><span>This week · $300</span></div>
+                <svg class="spending-chart" data-daily-spending="20 35 25 90 45 55 30" viewBox="0 0 300 135"><line class="chart-grid" x1="28" y1="20" x2="290" y2="20"/><line class="chart-grid" x1="28" y1="58" x2="290" y2="58"/><line class="chart-grid" x1="28" y1="96" x2="290" y2="96"/><text x="3" y="23">$120</text><text x="9" y="61">$60</text><text x="15" y="99">$0</text><text x="28" y="120">M</text><text x="68" y="120">T</text><text x="108" y="120">W</text><text x="148" y="120">T</text><text x="188" y="120">F</text><text x="228" y="120">S</text><text x="271" y="120">S</text><path class="spending-path" d="M31 83.33 L71 73.83 L111 80.17 L151 39 L191 67.5 L231 61.17 L274 77"/><circle class="chart-point" cx="151" cy="39" r="4"/></svg>
+                <div class="budget-copy"><span>Weekly plan: $500 · spent: $300</span><strong>$200 remaining</strong></div><div class="budget-track"><span class="budget-fill"></span></div>
+              </div>
+              <div class="insights-card"><div class="mini-heading"><span>Suggestions</span><span>2 patterns</span></div><p class="insight-card insight-one"><strong>Dining · $86 this week</strong>Try two home-cooked meals next week.</p><p class="insight-card insight-two"><strong>Weekly balance</strong>You have $200 left from your $500 plan.</p></div>
+            </div>
+          </figure>
+        </div>
+      </details>
+    </section>
+
+    <footer class="site-footer"><div><p>A growing system of ideas</p><h2>Imagination is always shaping what comes next.</h2></div><a href="https://github.com/June74" target="_blank" rel="noopener noreferrer">Follow my work on GitHub <span aria-hidden="true">↗</span></a><p class="footer-meta"><span>Injun Lee</span><span>AI systems · software · direction</span></p></footer>
+  </main>
+</body>
+</html>
