@@ -15,9 +15,9 @@ const publicHtmlRoutes = [
   'certificates/cloud-foundations/index.html',
   'certificates/data-engineering/index.html',
   'projects/index.html',
-  'projects/june/index.html',
   'projects/mm/index.html',
   'projects/synapse/index.html',
+  'projects/vision/index.html',
 ];
 const approvedArtifactFiles = [
   'about/index.html',
@@ -28,9 +28,9 @@ const approvedArtifactFiles = [
   'certificates/index.html',
   'index.html',
   'projects/index.html',
-  'projects/june/index.html',
   'projects/mm/index.html',
   'projects/synapse/index.html',
+  'projects/vision/index.html',
   'script.js',
   'styles.css',
 ];
@@ -49,7 +49,7 @@ const allowedLocalUrls = new Set([
   'certificates/',
   'about/',
   'projects/synapse/',
-  'projects/june/',
+  'projects/vision/',
   'projects/mm/',
   'certificates/ai-routing/',
   'certificates/data-engineering/',
@@ -613,7 +613,7 @@ test('page contains the approved person-first content', async () => {
   assert.match(html, /I am a developer exploring how AI agents, dependable infrastructure, and practical product design can make complicated work feel more manageable\./);
   const productDescriptions = [
     ['synapse', 'An AI routing system that analyzes each prompt and matches it with a suitable model.'],
-    ['june', 'An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.'],
+    ['vision', 'An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.'],
     ['mm', 'A personal finance tracker that turns spending patterns into clear insights and practical suggestions.'],
   ];
   const assertProjectDescriptions = (source) => {
@@ -628,8 +628,8 @@ test('page contains the approved person-first content', async () => {
     }
   };
   assertProjectDescriptions(html);
-  const [synapseDescription, juneDescription] = productDescriptions.map(([, description]) => description);
-  const swappedDescriptions = html.replace(synapseDescription, '__SWAPPED_DESCRIPTION__').replace(juneDescription, synapseDescription).replace('__SWAPPED_DESCRIPTION__', juneDescription);
+  const [synapseDescription, visionDescription] = productDescriptions.map(([, description]) => description);
+  const swappedDescriptions = html.replace(synapseDescription, '__SWAPPED_DESCRIPTION__').replace(visionDescription, synapseDescription).replace('__SWAPPED_DESCRIPTION__', visionDescription);
   assert.throws(() => assertProjectDescriptions(swappedDescriptions), /project-line/);
   assert.doesNotMatch(html, /I own the product direction/i);
   assert.doesNotMatch(html, /Auburn|rÃ©sumÃ©|resume/i);
@@ -648,65 +648,41 @@ test('hero uses the approved compact personal signature', async () => {
   assert.match(css, /\.hero-copy > h1\s*\{[^}]*font:\s*500\s+clamp\(3\.5rem,\s*7vw,\s*6\.5rem\)\/\.92\s+var\(--display\)/i);
 });
 
-test('hero signature is a contained, decorative three-object unicycle scene', async () => {
+test('hero signature is a contained, accessible rotating Earth with project orbits', async () => {
   const html = await readSite('index.html');
   const css = await readSite('styles.css');
 
-  assert.doesNotMatch(html, /solar-system|core-halo|class="orbit/, 'the orbital hero graphic is superseded');
-  assert.doesNotMatch(css, /\.solar-system|\.orbit\b|@keyframes\s+(?:orbit-\w+|halo)\b/);
+  assert.doesNotMatch(html, /juggle-signature|juggle-stage|juggle-item|juggle-disc/);
+  assert.doesNotMatch(css, /\.juggle-|@keyframes\s+juggle-/);
 
-  const stage = html.match(/<svg class="juggle-stage"[\s\S]*?<\/svg>/);
-  assert.ok(stage, 'hero contains the juggler stage');
+  const stage = html.match(/<svg class="orbit-stage"[\s\S]*?<\/svg>/);
+  assert.ok(stage, 'hero contains the Earth orbit stage');
   assert.match(stage[0], /role="img"/, 'the scene reports itself as a single image');
-  assert.match(stage[0], /aria-label="[^"]*unicycle[^"]*GitHub[^"]*LinkedIn[^"]*Gmail[^"]*"/i, 'the scene describes its unicycle and three objects');
-  assert.doesNotMatch(stage[0], /<a\b|tabindex|href/i, 'the juggled marks are decoration, not controls');
+  assert.match(stage[0], /aria-label="[^"]*Earth[^"]*project[^"]*"/i, 'the scene describes the Earth and projects');
+  assert.match(stage[0], /class="earth-sphere"/);
+  assert.match(stage[0], /data-orbit-layer/);
+  assert.doesNotMatch(stage[0], /<a\b|tabindex|href/i, 'project markers are decoration, not controls');
 
-  const slots = [...stage[0].matchAll(/class="juggle-item juggle-slot-([1-3])"/g)].map((match) => match[1]);
-  assert.deepEqual(slots, ['1', '2', '3'], 'GitHub, LinkedIn, and Gmail stay in the air');
-  assert.equal((stage[0].match(/class="juggle-disc"/g) ?? []).length, 3, 'every object rides its own disc');
-  assert.match(stage[0], /class="juggle-wheel"/, 'the figure balances on a unicycle wheel');
-  assert.match(stage[0], /class="juggle-frame"/, 'the simple unicycle frame is drawn');
-
-  for (const label of ['GitHub — link placeholder', 'LinkedIn — link placeholder', 'Gmail — contact placeholder']) {
-    assert.equal((html.match(new RegExp(label, 'g')) ?? []).length, 1, `${label} is the single visible pending label`);
-  }
+  for (const initial of ['S', 'V', 'M']) assert.match(html, new RegExp(`data-orbit-initial="${initial}"`));
+  assert.match(html, /data-orbit-labels/);
+  assert.match(html, /class="orbit-key">S<\/span><span>Synapse/);
+  assert.match(html, /class="orbit-key">V<\/span><span>Vision/);
+  assert.match(html, /class="orbit-key">M<\/span><span>MM/);
 });
 
-test('juggler motion is phase-staggered and rests in a designed static frame', async () => {
+test('Earth and project orbit motion is restrained and rests in a designed static frame', async () => {
   const css = await readSite('styles.css');
-  for (const track of ['juggle-bob', 'juggle-arc']) {
-    assert.match(css, new RegExp(`@keyframes\\s+${track}\\s*\\{`), `missing @keyframes ${track}`);
-  }
-
-  const delays = [];
-  for (let slot = 1; slot <= 3; slot += 1) {
-    const rule = css.match(new RegExp(`\\.juggle-slot-${slot}\\s*\\{[^}]*animation-delay:\\s*(-?[\\d.]+s)`));
-    assert.ok(rule, `slot ${slot} must declare its place in the cascade`);
-    delays.push(rule[1]);
-  }
-  assert.deepEqual(delays, ['0s', '-1.2s', '-2.4s'], 'three marks spread evenly through one 3.6s cascade');
-  assert.equal(new Set(delays).size, 3, 'no two marks share a phase');
-
-  // Every mark shares one keyframe track, so the marks only stay apart because that
-  // track is a circuit: a tall throw out and a shallower one back. Equal-height arcs
-  // would retrace one path and stack evenly-spaced marks on top of each other.
-  const arc = cssAtRuleBody(css, '@keyframes juggle-arc');
-  const rises = [...arc.matchAll(/translate\((-?[\d.]+)(?:px)?,\s*(-?[\d.]+)(?:px)?\)/g)].map((match) => Number(match[2]));
-  const outbound = Math.min(...rises.slice(0, 9));
-  const inbound = Math.min(...rises.slice(9));
-  assert.ok(outbound < inbound - 40, `arc must be a circuit; outbound peak ${outbound} vs inbound peak ${inbound}`);
-  assert.equal(rises.at(0), 0, 'the circuit starts in a hand');
-  assert.equal(rises.at(-1), 0, 'the circuit closes back in a hand');
+  assert.match(css, /@keyframes\s+earth-spin\s*\{/);
+  assert.match(css, /@keyframes\s+project-orbit-spin\s*\{/);
+  assert.match(css, /@keyframes\s+project-orbit-counter\s*\{/);
+  assert.match(css, /\.earth-surface\s*\{[^}]*animation:\s*earth-spin/);
+  assert.match(css, /\.project-orbit\s*\{[^}]*animation:\s*project-orbit-spin/);
+  assert.match(css, /\.orbit-marker-face\s*\{[^}]*animation:\s*project-orbit-counter/);
 
   const reduced = cssAtRuleBody(css, '@media (prefers-reduced-motion: reduce)');
-  assert.match(reduced, /\.juggle-figure[^{]*\{[^}]*animation:\s*none\s*!important/i, 'reduced motion stops the scene outright');
-  const restingPositions = [];
-  for (let slot = 1; slot <= 3; slot += 1) {
-    const rest = reduced.match(new RegExp(`\\.juggle-slot-${slot}\\s*\\{\\s*transform:\\s*translate\\(([^)]+)\\)\\s*!important`));
-    assert.ok(rest, `slot ${slot} needs an authored resting position`);
-    restingPositions.push(rest[1]);
-  }
-  assert.equal(new Set(restingPositions).size, 3, 'the rest frame spreads the marks instead of stacking them');
+  assert.match(reduced, /\.earth-surface[^\{]*\{[^}]*animation:\s*none\s*!important/i);
+  assert.match(reduced, /\.project-orbit[^\{]*\{[^}]*animation:\s*none\s*!important/i);
+  assert.match(reduced, /\.orbit-marker-face[^\{]*\{[^}]*animation:\s*none\s*!important/i);
 });
 
 test('Synapse entry nodes reuse the selected and answer treatments', async () => {
@@ -739,13 +715,13 @@ test('Synapse entry nodes reuse the selected and answer treatments', async () =>
   assert.doesNotMatch(css, /\.route-(?:inbound|answer)\.route-selected\s*\{[^}]*stroke\s*:/i);
 });
 
-test('June animates all four completion markers in sequence', async () => {
+test('Vision animates all four completion markers in sequence', async () => {
   const html = await readSite('index.html');
   const css = await readSite('styles.css');
-  const june = html.match(/<details class="project" data-project="june">([\s\S]*?)<\/details>/);
+  const vision = html.match(/<details class="project" data-project="vision">([\s\S]*?)<\/details>/);
 
-  assert.ok(june, 'June project exists');
-  const taskClasses = [...june[1].matchAll(/<p class="task (task-(?:one|two|three|four))">/g)].map((match) => match[1]);
+  assert.ok(vision, 'Vision project exists');
+  const taskClasses = [...vision[1].matchAll(/<p class="task (task-(?:one|two|three|four))">/g)].map((match) => match[1]);
   assert.deepEqual(taskClasses, ['task-one', 'task-two', 'task-three', 'task-four']);
   assert.match(css, /\.project\.is-animating \.task::before\s*\{[^}]*border-color:\s*var\(--forest\)[^}]*background:\s*transparent[^}]*color:\s*transparent/i);
 
@@ -759,17 +735,17 @@ test('June animates all four completion markers in sequence', async () => {
 
 test('page uses three native project disclosures', async () => {
   const html = await readSite('index.html');
-  const projects = html.match(/<details class="project" data-project="(synapse|june|mm)">/g) ?? [];
+  const projects = html.match(/<details class="project" data-project="(synapse|vision|mm)">/g) ?? [];
   assert.equal(projects.length, 3);
   assert.equal((html.match(/<summary class="project-summary">/g) ?? []).length, 3);
   assert.match(html, /id="current-work"/);
   assert.match(html, /href="#current-work"/);
 });
 
-test('June and MM figures expose substantive descriptions through their captions', async () => {
+test('Vision and MM figures expose substantive descriptions through their captions', async () => {
   const html = await readSite('index.html');
   const figures = [
-    ['june', 'june-caption', 'An illustrative weekly calendar pairs planned events with follow-through tasks.'],
+    ['vision', 'vision-caption', 'An illustrative weekly calendar pairs planned events with follow-through tasks.'],
     ['mm', 'mm-caption', 'A sample spending chart pairs the weekly budget with practical suggestions.'],
   ];
 
@@ -929,6 +905,73 @@ test('enhancement safely does nothing on routes without project disclosures', as
   assert.doesNotThrow(() => vm.runInNewContext(js, {
     document: { querySelectorAll: () => [] },
   }));
+});
+
+test('orbit renderer adds a ring and initial marker for every featured project', async () => {
+  class FakeNode {
+    constructor(tagName) {
+      this.tagName = tagName;
+      this.children = [];
+      this.attributes = new Map();
+      this.dataset = {};
+      this.style = {};
+      this.textContent = '';
+    }
+
+    setAttribute(name, value) {
+      this.attributes.set(name, String(value));
+    }
+
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null;
+    }
+
+    append(...nodes) {
+      this.children.push(...nodes);
+    }
+
+    replaceChildren(...nodes) {
+      this.children = [...nodes];
+    }
+
+    addEventListener() {}
+    removeEventListener() {}
+  }
+
+  const orbitLayer = new FakeNode('g');
+  const orbitLabels = new FakeNode('ul');
+  const names = ['Synapse', 'Vision', 'MM', 'Atlas'];
+  const projects = names.map((name, index) => {
+    const project = new FakeNode('details');
+    project.dataset.project = name.toLowerCase();
+    project.querySelector = (selector) => selector === '.project-name' ? { textContent: name } : null;
+    project.classList = { add() {}, remove() {}, contains: () => false };
+    project.open = false;
+    const summary = new FakeNode('summary');
+    project.querySelector = (selector) => selector === '.project-name'
+      ? { textContent: name }
+      : selector === '.project-summary' ? summary : null;
+    return project;
+  });
+  const fineHover = { matches: false, addEventListener() {}, removeEventListener() {} };
+  const js = await readSite('script.js');
+
+  vm.runInNewContext(js, {
+    document: {
+      querySelectorAll: () => projects,
+      querySelector: (selector) => selector === '[data-orbit-layer]' ? orbitLayer : orbitLabels,
+      createElementNS: (_namespace, tagName) => new FakeNode(tagName),
+      createElement: (tagName) => new FakeNode(tagName),
+    },
+    window: { matchMedia: () => fineHover },
+    setTimeout,
+  });
+
+  assert.equal(orbitLayer.children.length, names.length);
+  assert.deepEqual(orbitLayer.children.map((node) => node.getAttribute('data-orbit-initial')), ['S', 'V', 'M', 'A']);
+  assert.deepEqual(orbitLabels.children.map((node) => node.children[1].textContent), [
+    'Synapse', 'Vision', 'MM', 'Atlas',
+  ]);
 });
 
 test('hover listeners exist only while a fine pointer is available', async () => {
@@ -1481,7 +1524,7 @@ test('predeployment checklist enforces the local-to-authorized-live acceptance o
   assert.match(checklist, /All post-authorization live-URL items must have evidence before the release is called accepted or publicly verified\./);
 });
 
-test('route-wide editorial visual contract styles every public page without changing the home juggler', async () => {
+test('route-wide editorial visual contract styles every public page without changing the home Earth orbit', async () => {
   const css = await readSite('styles.css');
   const favicon = await readFile(path.join(siteDir, 'assets', 'favicon.svg'), 'utf8');
 

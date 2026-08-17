@@ -30,33 +30,52 @@
         <p>I am a developer exploring how AI agents, dependable infrastructure, and practical product design can make complicated work feel more manageable.</p>
         <a class="hero-jump" href="#current-work">See featured projects</a>
       </div>
-      <div class="juggle-signature">
-        <svg class="juggle-stage" viewBox="0 0 420 420" role="img" aria-label="A hand-drawn stick figure balances on a simple unicycle while juggling three decorative objects for GitHub, LinkedIn, and Gmail">
-          <line class="juggle-floor" x1="62" y1="382" x2="358" y2="382"/>
-          <g class="juggle-figure">
-            <circle class="juggle-head" cx="210" cy="180" r="20"/>
-            <path class="juggle-limb" d="M210 200 V272"/>
-            <path class="juggle-limb" d="M210 215 L178 240 L154 216"/>
-            <path class="juggle-limb" d="M210 215 L242 240 L266 216"/>
-            <path class="juggle-limb" d="M210 272 L190 315 L178 315"/>
-            <path class="juggle-limb" d="M210 272 L230 315 L242 315"/>
-            <circle class="juggle-wheel" cx="210" cy="346" r="35"/>
-            <path class="juggle-frame" d="M210 276 V311 M190 315 H230 M210 311 V346 M184 346 H236"/>
-          <g class="juggle-item juggle-slot-1"><g class="tone-ink">
-            <circle class="juggle-disc" cx="210" cy="248" r="15"/>
-            <g class="juggle-glyph" transform="translate(200 238) scale(1.25)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></g>
-          </g></g>
-          <g class="juggle-item juggle-slot-2"><g class="tone-copper">
-            <circle class="juggle-disc" cx="210" cy="248" r="15"/>
-            <g class="juggle-glyph" transform="translate(200 238) scale(1.25)"><path d="M1.2 5.9h2.6V15H1.2zM2.5.9a1.55 1.55 0 1 1 0 3.1 1.55 1.55 0 0 1 0-3.1zM6.1 5.9h2.5v1.24h.04c.35-.63 1.2-1.3 2.48-1.3 2.65 0 3.14 1.63 3.14 3.75V15h-2.6v-4.35c0-1.04-.02-2.37-1.5-2.37-1.5 0-1.73 1.13-1.73 2.3V15H6.1z"/></g>
-          </g></g>
-          <g class="juggle-item juggle-slot-3"><g class="tone-slate">
-            <circle class="juggle-disc" cx="210" cy="248" r="15"/>
-            <g class="juggle-glyph" transform="translate(200 238) scale(1.25)"><path d="M1.4 3.6h13.2c.5 0 .9.4.9.9v7c0 .5-.4.9-.9.9H1.4a.9.9 0 0 1-.9-.9v-7c0-.5.4-.9.9-.9Z"/><path class="juggle-cut" d="M1.6 4.6 8 9.5l6.4-4.9"/></g>
-          </g></g>
+      <div class="orbit-signature">
+        <svg class="orbit-stage" viewBox="0 0 420 420" role="img" aria-label="A softly illustrated Earth rotates at the center while project initials orbit around it">
+          <defs>
+            <clipPath id="earth-clip"><circle cx="210" cy="210" r="64"/></clipPath>
+          </defs>
+          <g class="project-orbits" data-orbit-layer aria-hidden="true">
+            <g class="project-orbit orbit-fallback-1" data-orbit-project="synapse" data-orbit-initial="S">
+              <circle class="orbit-ring" cx="210" cy="210" r="96"/>
+              <g class="orbit-marker" transform="translate(300 245)"><g class="orbit-marker-face">
+                <circle class="orbit-marker-disc" r="18"/><text class="orbit-marker-label" text-anchor="middle" y="6">S</text>
+              </g>
+              </g>
+            </g>
+            <g class="project-orbit orbit-fallback-2" data-orbit-project="vision" data-orbit-initial="V">
+              <circle class="orbit-ring" cx="210" cy="210" r="130"/>
+              <g class="orbit-marker" transform="translate(110 293)"><g class="orbit-marker-face">
+                <circle class="orbit-marker-disc" r="18"/><text class="orbit-marker-label" text-anchor="middle" y="6">V</text>
+              </g>
+              </g>
+            </g>
+            <g class="project-orbit orbit-fallback-3" data-orbit-project="mm" data-orbit-initial="M">
+              <circle class="orbit-ring" cx="210" cy="210" r="164"/>
+              <g class="orbit-marker" transform="translate(182 48)"><g class="orbit-marker-face">
+                <circle class="orbit-marker-disc" r="18"/><text class="orbit-marker-label" text-anchor="middle" y="6">M</text>
+              </g>
+              </g>
+            </g>
           </g>
+          <circle class="earth-sphere" cx="210" cy="210" r="64"/>
+          <g class="earth-surface" clip-path="url(#earth-clip)" aria-hidden="true">
+            <rect x="145" y="145" width="130" height="130" class="earth-water"/>
+            <path class="earth-land earth-land-one" d="M155 176c15-14 22-20 35-19l7 14 18 3 7 18-11 10-18-5-12 14-20-7-12-16z"/>
+            <path class="earth-land earth-land-two" d="M227 151l22 9 12 17-8 17-14 3-7 19-16 14-5-18 9-15-6-14 11-12z"/>
+            <path class="earth-land earth-land-three" d="M177 236l14-8 15 8 3 15-11 14-10-7-16 1-7-12z"/>
+            <ellipse class="earth-latitude" cx="210" cy="210" rx="62" ry="27"/>
+            <ellipse class="earth-latitude earth-latitude-low" cx="210" cy="210" rx="62" ry="45"/>
+            <path class="earth-meridian" d="M210 146c-24 20-35 41-35 64s11 44 35 64M210 146c24 20 35 41 35 64s-11 44-35 64"/>
+          </g>
+          <circle class="earth-outline" cx="210" cy="210" r="64"/>
+          <path class="earth-axis" d="M173 145c23 18 51 18 74 0M173 275c23-18 51-18 74 0"/>
         </svg>
-        <p class="juggle-legend"><span>GitHub — link placeholder</span><span>LinkedIn — link placeholder</span><span>Gmail — contact placeholder</span></p>
+        <ul class="orbit-legend" id="orbit-labels" data-orbit-labels aria-label="Projects represented in the orbit">
+          <li><span class="orbit-key">S</span><span>Synapse</span></li>
+          <li><span class="orbit-key">V</span><span>Vision</span></li>
+          <li><span class="orbit-key">M</span><span>MM</span></li>
+        </ul>
       </div>
     </header>
 
@@ -99,16 +118,16 @@
         </div>
       </details>
 
-      <details class="project" data-project="june">
+      <details class="project" data-project="vision">
         <summary class="project-summary">
           <span class="project-number">02</span>
-          <span class="project-copy"><span class="project-name">June</span><span class="project-line">An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.</span><span class="topics"><span>Tool placeholder 1</span><span>Tool placeholder 2</span><span>Tool placeholder 3</span><span>Tool placeholder 4</span><span>Tool placeholder 5</span><span>Tool placeholder 6</span></span></span>
+          <span class="project-copy"><span class="project-name">Vision</span><span class="project-line">An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.</span><span class="topics"><span>Tool placeholder 1</span><span>Tool placeholder 2</span><span>Tool placeholder 3</span><span>Tool placeholder 4</span><span>Tool placeholder 5</span><span>Tool placeholder 6</span></span></span>
           <span class="project-plus" aria-hidden="true">+</span>
         </summary>
         <div class="project-panel">
-          <figure class="project-visual june-visual" aria-labelledby="june-caption">
-            <figcaption id="june-caption"><span>A week taking shape</span><span>Calendar and follow-through</span><span class="diagram-description">An illustrative weekly calendar pairs planned events with follow-through tasks.</span></figcaption>
-            <div class="june-layout" aria-hidden="true">
+          <figure class="project-visual vision-visual" aria-labelledby="vision-caption">
+            <figcaption id="vision-caption"><span>A week taking shape</span><span>Calendar and follow-through</span><span class="diagram-description">An illustrative weekly calendar pairs planned events with follow-through tasks.</span></figcaption>
+            <div class="vision-layout" aria-hidden="true">
               <div class="calendar-card"><div class="mini-heading"><span>Weekly calendar</span><span>May 11–15</span></div>
                 <div class="schedule-grid"><span></span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span>
                   <span class="time">9:00</span><span class="slot"><span class="calendar-event event-one">Plan week</span></span><span class="slot"></span><span class="slot"><span class="calendar-event copper event-two">Review</span></span><span class="slot"></span><span class="slot"></span>
@@ -123,7 +142,7 @@
           <div class="project-panel-copy">
             <div><p class="panel-label">Tools used</p><p>Tool placeholder 1 · Tool placeholder 2 · Tool placeholder 3</p></div>
             <div><p class="panel-label">Skills demonstrated</p><p>Agent workflow placeholder · planning placeholder · follow-through placeholder.</p></div>
-            <a class="panel-link" href="projects/june/">Explore full project <span aria-hidden="true">→</span></a>
+            <a class="panel-link" href="projects/vision/">Explore full project <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </details>

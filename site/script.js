@@ -5,6 +5,83 @@ if (projects.length > 0) {
   const fineHover = window.matchMedia('(hover: hover) and (pointer: fine)');
   let pinnedProject = null;
 
+  const orbitLayer = typeof document.querySelector === 'function'
+    ? document.querySelector('[data-orbit-layer]')
+    : null;
+  const orbitLabels = typeof document.querySelector === 'function'
+    ? document.querySelector('[data-orbit-labels]')
+    : null;
+
+  function orbitInitial(name) {
+    return (name.trim().match(/[A-Za-z0-9]/)?.[0] ?? '?').toUpperCase();
+  }
+
+  function renderProjectOrbits() {
+    if (!orbitLayer || !orbitLabels) return;
+    const svgNamespace = 'http:' + String.fromCharCode(47, 47) + 'www.w3.org/2000/svg';
+    const radii = [96, 130, 164, 186, 202];
+    orbitLayer.replaceChildren();
+    orbitLabels.replaceChildren();
+
+    const entries = projects.map((project, index) => {
+      const name = project.querySelector('.project-name')?.textContent.trim()
+        || project.dataset.project
+        || `Project ${index + 1}`;
+      const initial = orbitInitial(name);
+      const angle = 20 + index * (360 / Math.max(projects.length, 3));
+      const radians = angle * Math.PI / 180;
+      const radius = radii[index] ?? radii.at(-1);
+      const x = 210 + Math.cos(radians) * radius;
+      const y = 210 + Math.sin(radians) * radius;
+
+      const orbit = document.createElementNS(svgNamespace, 'g');
+      orbit.setAttribute('class', 'project-orbit');
+      orbit.setAttribute('data-orbit-project', project.dataset.project || name.toLowerCase());
+      orbit.setAttribute('data-orbit-initial', initial);
+      const orbitDuration = `${24 + index * 6}s`;
+      orbit.style.animationDuration = orbitDuration;
+
+      const ring = document.createElementNS(svgNamespace, 'circle');
+      ring.setAttribute('class', 'orbit-ring');
+      ring.setAttribute('cx', '210');
+      ring.setAttribute('cy', '210');
+      ring.setAttribute('r', String(radius));
+
+      const marker = document.createElementNS(svgNamespace, 'g');
+      marker.setAttribute('class', 'orbit-marker');
+      marker.setAttribute('transform', `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+      const markerFace = document.createElementNS(svgNamespace, 'g');
+      markerFace.setAttribute('class', 'orbit-marker-face');
+      markerFace.style.animationDuration = orbitDuration;
+      const disc = document.createElementNS(svgNamespace, 'circle');
+      disc.setAttribute('class', 'orbit-marker-disc');
+      disc.setAttribute('r', '18');
+      const label = document.createElementNS(svgNamespace, 'text');
+      label.setAttribute('class', 'orbit-marker-label');
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('y', '6');
+      label.textContent = initial;
+      markerFace.append(disc, label);
+      marker.append(markerFace);
+      orbit.append(ring, marker);
+      orbitLayer.append(orbit);
+
+      const item = document.createElement('li');
+      const key = document.createElement('span');
+      key.className = 'orbit-key';
+      key.textContent = initial;
+      const textNode = document.createElement('span');
+      textNode.textContent = name;
+      item.append(key, textNode);
+      orbitLabels.append(item);
+      return { initial, name };
+    });
+
+    orbitLayer.setAttribute('aria-label', entries.map(({ initial, name }) => `${initial} ${name}`).join(', '));
+  }
+
+  renderProjectOrbits();
+
 function restartAnimation(project) {
   project.classList.remove('is-animating');
   void project.offsetWidth;

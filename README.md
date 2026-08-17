@@ -9,7 +9,7 @@ A dependency-free, multi-page static portfolio presenting Injun Lee's current di
 | Home | `/` |
 | Projects | `/projects/` |
 | Synapse case study | `/projects/synapse/` |
-| June case study | `/projects/june/` |
+| Vision case study | `/projects/vision/` |
 | MM case study | `/projects/mm/` |
 | Certificates | `/certificates/` |
 | AI routing study map | `/certificates/ai-routing/` |

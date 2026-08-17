@@ -21,10 +21,17 @@ This record captures evidence for the local multi-page static portfolio candidat
 | Check | Result | Evidence status |
 | --- | --- | --- |
 | `node --check site/script.js` | Passed | Recorded static evidence |
-| `node --test tests/site.test.mjs` | 43 passed; 0 failed | Recorded static evidence |
+| `node --test tests/site.test.mjs` | 44 passed; 0 failed | Recorded static evidence |
 | `git diff --check` | Passed | Recorded static evidence |
 
-The test result covers all 43 currently defined automated checks. It does not substitute for hosting or public-release verification.
+### Earth orbit hero follow-up (2026-08-16)
+
+- The home hero now renders a softly illustrated rotating Earth with one circular initial marker and concentric ring per featured project (`S`/Synapse, `V`/Vision, `M`/MM).
+- The orbit renderer derives marker initials and labels from the project disclosure headings, so adding another featured disclosure creates another ring and marker without hand-editing the hero illustration.
+- The static fallback remains readable without JavaScript; reduced motion removes Earth, orbit, and marker animation while keeping the same final frame.
+- The renamed project route is now `/projects/vision/` and its public headings/copy use Vision.
+
+The test result covers all 44 currently defined automated checks. It does not substitute for hosting or public-release verification.
 
 ## Browser route and viewport checklist
 
@@ -35,7 +42,7 @@ The following checks require an interactive browser pass against the local previ
 | `/` — Home | Passed | Passed | Passed | Passed |
 | `/projects/` — Projects | Passed | Passed | Passed | Passed |
 | `/projects/synapse/` — Synapse case study | Passed | Passed | Passed | Passed |
-| `/projects/june/` — June case study | Passed | Passed | Passed | Passed |
+| `/projects/vision/` — Vision case study | Passed | Passed | Passed | Passed |
 | `/projects/mm/` — MM case study | Passed | Passed | Passed | Passed |
 | `/certificates/` — Certificates | Passed | Passed | Passed | Passed |
 | `/certificates/ai-routing/` — AI routing study map | Passed | Passed | Passed | Passed |
@@ -62,7 +69,7 @@ The matrix covered all 10 routes at 320, 768, 1024, and 1440 px widths (40 route
 | `site/index.html` | Present | Home route |
 | `site/projects/index.html` | Present | Projects route |
 | `site/projects/synapse/index.html` | Present | Synapse case study |
-| `site/projects/june/index.html` | Present | June case study |
+| `site/projects/vision/index.html` | Present | Vision case study |
 | `site/projects/mm/index.html` | Present | MM case study |
 | `site/certificates/index.html` | Present | Certificates route |
 | `site/certificates/ai-routing/index.html` | Present | AI routing study map |
