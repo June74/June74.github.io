@@ -1,8 +1,9 @@
 'use strict';
 
 const projects = [...document.querySelectorAll('.project')];
-const fineHover = window.matchMedia('(hover: hover) and (pointer: fine)');
-let pinnedProject = null;
+if (projects.length > 0) {
+  const fineHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+  let pinnedProject = null;
 
 function restartAnimation(project) {
   project.classList.remove('is-animating');
@@ -44,6 +45,32 @@ function togglePinned(project) {
   else closeProject(project);
 }
 
+const hoverListeners = projects.map((project) => ({
+  project,
+  onPointerEnter: () => previewProject(project),
+  onPointerLeave: () => {
+    if (project.classList.contains('is-preview')) closeProject(project);
+  },
+}));
+let hoverListenersBound = false;
+
+function updateHoverListeners() {
+  if (fineHover.matches && !hoverListenersBound) {
+    for (const { project, onPointerEnter, onPointerLeave } of hoverListeners) {
+      project.addEventListener('pointerenter', onPointerEnter);
+      project.addEventListener('pointerleave', onPointerLeave);
+    }
+    hoverListenersBound = true;
+  } else if (!fineHover.matches && hoverListenersBound) {
+    for (const { project, onPointerEnter, onPointerLeave } of hoverListeners) {
+      project.removeEventListener('pointerenter', onPointerEnter);
+      project.removeEventListener('pointerleave', onPointerLeave);
+      if (project.classList.contains('is-preview')) closeProject(project);
+    }
+    hoverListenersBound = false;
+  }
+}
+
 for (const project of projects) {
   const summary = project.querySelector('.project-summary');
   let activationGeneration = 0;
@@ -76,14 +103,8 @@ for (const project of projects) {
     }, 0);
   });
 
-  project.addEventListener('pointerenter', () => previewProject(project));
-  project.addEventListener('pointerleave', () => {
-    if (project.classList.contains('is-preview')) closeProject(project);
-  });
 }
 
-fineHover.addEventListener('change', () => {
-  for (const project of projects) {
-    if (project.classList.contains('is-preview')) closeProject(project);
-  }
-});
+fineHover.addEventListener('change', updateHoverListeners);
+updateHoverListeners();
+}

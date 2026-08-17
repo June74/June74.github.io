@@ -7,6 +7,33 @@ import vm from 'node:vm';
 const root = path.resolve(import.meta.dirname, '..');
 const siteDir = path.join(root, 'site');
 const readSite = (name) => readFile(path.join(siteDir, name), 'utf8');
+const publicHtmlRoutes = [
+  'index.html',
+  'about/index.html',
+  'certificates/index.html',
+  'certificates/ai-routing/index.html',
+  'certificates/cloud-foundations/index.html',
+  'certificates/data-engineering/index.html',
+  'projects/index.html',
+  'projects/june/index.html',
+  'projects/mm/index.html',
+  'projects/synapse/index.html',
+];
+const approvedArtifactFiles = [
+  'about/index.html',
+  'assets/favicon.svg',
+  'certificates/ai-routing/index.html',
+  'certificates/cloud-foundations/index.html',
+  'certificates/data-engineering/index.html',
+  'certificates/index.html',
+  'index.html',
+  'projects/index.html',
+  'projects/june/index.html',
+  'projects/mm/index.html',
+  'projects/synapse/index.html',
+  'script.js',
+  'styles.css',
+];
 const cspPolicy = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'none'";
 const urlAttributeNames = new Set([
   'action', 'archive', 'attributionsrc', 'background', 'cite', 'classid', 'code', 'codebase', 'data',
@@ -14,15 +41,34 @@ const urlAttributeNames = new Set([
   'manifest', 'ping', 'poster', 'profile', 'src', 'srcset', 'usemap', 'xlink:href', 'xml:base',
 ]);
 const urlListAttributeNames = new Set(['archive', 'attributionsrc', 'ping']);
-const allowedLocalUrls = new Set(['assets/favicon.svg', 'styles.css', 'script.js']);
+const allowedLocalUrls = new Set([
+  'assets/favicon.svg',
+  'styles.css',
+  'script.js',
+  'projects/',
+  'certificates/',
+  'about/',
+  'projects/synapse/',
+  'projects/june/',
+  'projects/mm/',
+  'certificates/ai-routing/',
+  'certificates/data-engineering/',
+  'certificates/cloud-foundations/',
+]);
 const approvedColorProperties = new Map([
-  ['paper', '#f1eee6'],
+  ['paper', '#f3efe6'],
   ['panel', '#e2e6dc'],
-  ['ink', '#18201c'],
+  ['paper-2', '#e8e4d8'],
+  ['white', '#fbfaf6'],
+  ['ink', '#1e2924'],
+  ['muted', '#66716a'],
   ['forest', '#356351'],
   ['copper', '#b86f4b'],
   ['slate', '#718999'],
+  ['blue', '#718999'],
+  ['sage', '#dfe6dc'],
   ['rule', '#b2b2a9'],
+  ['line', '#c9c5ba'],
 ]);
 
 function parseAttributes(source) {
@@ -175,6 +221,64 @@ function assertApprovedHeadElements(html) {
   assert.deepEqual(new Set(linkKinds), new Set(['icon', 'stylesheet']));
 }
 
+function expectedSharedPath(route, filename) {
+  const depth = path.posix.dirname(route) === '.' ? 0 : path.posix.dirname(route).split('/').length;
+  return `${'../'.repeat(depth)}${filename}`;
+}
+
+function assertRouteHeadElements(route, html) {
+  assertApprovedMetadata(html);
+  const tags = parseStartTags(html);
+  const links = tags.filter((tag) => tag.name === 'link');
+  const scripts = tags.filter((tag) => tag.name === 'script');
+  const expectedIcon = expectedSharedPath(route, 'assets/favicon.svg');
+  const expectedStyles = expectedSharedPath(route, 'styles.css');
+  const expectedScript = expectedSharedPath(route, 'script.js');
+
+  assert.equal(links.length, 2, `${route} must contain exactly the local favicon and stylesheet links`);
+  assert.equal(scripts.length, 1, `${route} must contain exactly the shared progressive-enhancement script`);
+
+  const icon = links.find((tag) => singleAttribute(tag, 'rel').toLowerCase() === 'icon');
+  const stylesheet = links.find((tag) => singleAttribute(tag, 'rel').toLowerCase() === 'stylesheet');
+  assert.ok(icon, `${route} must include the local favicon`);
+  assert.ok(stylesheet, `${route} must include the shared stylesheet`);
+  assert.equal(singleAttribute(icon, 'href'), expectedIcon);
+  assert.equal(singleAttribute(stylesheet, 'href'), expectedStyles);
+  assert.deepEqual(new Set(scripts[0].attributes.map((attribute) => attribute.name)), new Set(['src', 'defer']));
+  assert.equal(singleAttribute(scripts[0], 'src'), expectedScript);
+}
+
+function assertRouteLinks(route, html) {
+  const routeDirectory = path.posix.dirname(route);
+  const ids = new Set([...html.matchAll(/\bid\s*=\s*(["'])([^"']+)\1/gi)].map((match) => match[2]));
+
+  for (const tag of parseStartTags(html)) {
+    for (const attribute of tag.attributes) {
+      if (!urlAttributeNames.has(attribute.name)) continue;
+      const value = typeof attribute.value === 'string' ? decodeTextEntities(attribute.value) : attribute.value;
+      assert.equal(typeof value, 'string', `${route} <${tag.name}> ${attribute.name} requires a value`);
+      assert.notEqual(value.trim(), '', `${route} <${tag.name}> ${attribute.name} cannot be empty`);
+      assert.doesNotMatch(value, /^(?:javascript:|data:|mailto:|tel:|#?$)/i, `${route} <${tag.name}> ${attribute.name} is not an approved public destination`);
+
+      if (value.startsWith('#')) {
+        assert.ok(ids.has(value.slice(1)), `${route} fragment ${value} must name an element on the route`);
+        continue;
+      }
+      if (/^https?:\/\//i.test(value)) {
+        assert.equal(route, 'index.html', 'only the owner-approved GitHub profile may be an external destination');
+        assert.equal(tag.name, 'a', 'remote assets are not permitted');
+        assert.equal(value, 'https://github.com/June74', 'external links must use the owner-approved GitHub profile');
+        continue;
+      }
+
+      assert.doesNotMatch(value, /^(?:\/|\\|\.\.\\)/, `${route} must use a local route-relative destination`);
+      const resolved = path.posix.normalize(path.posix.join(routeDirectory, value));
+      const target = value.endsWith('/') ? path.posix.join(resolved, 'index.html') : resolved;
+      assert.ok(approvedArtifactFiles.includes(target), `${route} destination ${value} must resolve to an approved public artifact`);
+    }
+  }
+}
+
 function assertAllowedUrl(value, tagName, attributeName) {
   const context = `<${tagName}> ${attributeName}`;
   assert.equal(typeof value, 'string', `${context} requires a value`);
@@ -214,7 +318,7 @@ function assertApprovedUrls(html) {
 
 function assertApprovedOutboundAnchors(html) {
   const outboundAnchors = parseStartTags(html).filter((tag) => tag.name === 'a' && decodedAttributeValues(tag, 'href').includes('https://github.com/June74'));
-  assert.equal(outboundAnchors.length, 2);
+  assert.equal(outboundAnchors.length, 1);
   for (const anchor of outboundAnchors) {
     assert.equal(singleDecodedAttribute(anchor, 'href'), 'https://github.com/June74');
     assert.equal(singleDecodedAttribute(anchor, 'target'), '_blank');
@@ -430,6 +534,11 @@ function assertNoDraftContent(html) {
   }
 }
 
+function assertSafePlaceholderContent(html) {
+  assert.doesNotMatch(html, /<(?:a|button|input|select|textarea)\b[^>]*\bplaceholder\b/i, 'placeholders cannot be interactive controls');
+  assert.doesNotMatch(html, /<a\b[^>]*>[\s\S]{0,240}?\bplaceholder\b[\s\S]{0,240}?<\/a>/i, 'placeholder text cannot be a link destination');
+}
+
 async function listFiles(directory, prefix = '') {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
@@ -499,9 +608,9 @@ function assertMmSampleContract(html, css) {
 
 test('page contains the approved person-first content', async () => {
   const html = await readSite('index.html');
-  assert.match(html, /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>/);
-  assert.match(html, /I build AI systems/);
-  assert.match(html, /driven by imagination\./);
+  assert.match(html, /<p class="eyebrow">Hello! My name is<\/p>/);
+  assert.match(html, /<h1>\s*Injun Lee\.<\/h1>/);
+  assert.match(html, /I am a developer exploring how AI agents, dependable infrastructure, and practical product design can make complicated work feel more manageable\./);
   const productDescriptions = [
     ['synapse', 'An AI routing system that analyzes each prompt and matches it with a suitable model.'],
     ['june', 'An AI secretary that brings scheduling, tasks, reminders, and follow-ups into one place.'],
@@ -532,12 +641,72 @@ test('hero uses the approved compact personal signature', async () => {
 
   assert.match(
     html,
-    /<h1>\s*<span class="hero-name">Injun Lee\.<\/span>\s*<span class="hero-thesis-line">I build AI systems<\/span>\s*<span class="hero-thesis-line">around people\.<\/span>\s*<\/h1>/,
+    /<p class="eyebrow">Hello! My name is<\/p>\s*<h1>\s*Injun Lee\.<\/h1>/,
   );
   assert.doesNotMatch(html, /\bI am\s+Injun Lee\b/i);
-  assert.match(css, /\.hero-name\s*\{[^}]*font:\s*680\s+clamp\(1\.75rem,\s*3vw,\s*2\.2rem\)\/1\s+var\(--sans\)/i);
-  assert.match(css, /\.hero-name::after\s*\{[^}]*width:\s*42px[^}]*height:\s*2px[^}]*background:\s*var\(--copper\)/i);
-  assert.match(css, /\.hero h1\s*\{[^}]*font:\s*500\s+clamp\(2\.65rem,\s*4\.6vw,\s*4\.65rem\)\/\.94\s+var\(--display\)/i);
+  assert.match(css, /\.hero-copy > \.eyebrow\s*\{[^}]*color:\s*var\(--forest\)/i);
+  assert.match(css, /\.hero-copy > h1\s*\{[^}]*font:\s*500\s+clamp\(3\.5rem,\s*7vw,\s*6\.5rem\)\/\.92\s+var\(--display\)/i);
+});
+
+test('hero signature is a contained, decorative three-object unicycle scene', async () => {
+  const html = await readSite('index.html');
+  const css = await readSite('styles.css');
+
+  assert.doesNotMatch(html, /solar-system|core-halo|class="orbit/, 'the orbital hero graphic is superseded');
+  assert.doesNotMatch(css, /\.solar-system|\.orbit\b|@keyframes\s+(?:orbit-\w+|halo)\b/);
+
+  const stage = html.match(/<svg class="juggle-stage"[\s\S]*?<\/svg>/);
+  assert.ok(stage, 'hero contains the juggler stage');
+  assert.match(stage[0], /role="img"/, 'the scene reports itself as a single image');
+  assert.match(stage[0], /aria-label="[^"]*unicycle[^"]*GitHub[^"]*LinkedIn[^"]*Gmail[^"]*"/i, 'the scene describes its unicycle and three objects');
+  assert.doesNotMatch(stage[0], /<a\b|tabindex|href/i, 'the juggled marks are decoration, not controls');
+
+  const slots = [...stage[0].matchAll(/class="juggle-item juggle-slot-([1-3])"/g)].map((match) => match[1]);
+  assert.deepEqual(slots, ['1', '2', '3'], 'GitHub, LinkedIn, and Gmail stay in the air');
+  assert.equal((stage[0].match(/class="juggle-disc"/g) ?? []).length, 3, 'every object rides its own disc');
+  assert.match(stage[0], /class="juggle-wheel"/, 'the figure balances on a unicycle wheel');
+  assert.match(stage[0], /class="juggle-frame"/, 'the simple unicycle frame is drawn');
+
+  for (const label of ['GitHub — link placeholder', 'LinkedIn — link placeholder', 'Gmail — contact placeholder']) {
+    assert.equal((html.match(new RegExp(label, 'g')) ?? []).length, 1, `${label} is the single visible pending label`);
+  }
+});
+
+test('juggler motion is phase-staggered and rests in a designed static frame', async () => {
+  const css = await readSite('styles.css');
+  for (const track of ['juggle-bob', 'juggle-arc']) {
+    assert.match(css, new RegExp(`@keyframes\\s+${track}\\s*\\{`), `missing @keyframes ${track}`);
+  }
+
+  const delays = [];
+  for (let slot = 1; slot <= 3; slot += 1) {
+    const rule = css.match(new RegExp(`\\.juggle-slot-${slot}\\s*\\{[^}]*animation-delay:\\s*(-?[\\d.]+s)`));
+    assert.ok(rule, `slot ${slot} must declare its place in the cascade`);
+    delays.push(rule[1]);
+  }
+  assert.deepEqual(delays, ['0s', '-1.2s', '-2.4s'], 'three marks spread evenly through one 3.6s cascade');
+  assert.equal(new Set(delays).size, 3, 'no two marks share a phase');
+
+  // Every mark shares one keyframe track, so the marks only stay apart because that
+  // track is a circuit: a tall throw out and a shallower one back. Equal-height arcs
+  // would retrace one path and stack evenly-spaced marks on top of each other.
+  const arc = cssAtRuleBody(css, '@keyframes juggle-arc');
+  const rises = [...arc.matchAll(/translate\((-?[\d.]+)(?:px)?,\s*(-?[\d.]+)(?:px)?\)/g)].map((match) => Number(match[2]));
+  const outbound = Math.min(...rises.slice(0, 9));
+  const inbound = Math.min(...rises.slice(9));
+  assert.ok(outbound < inbound - 40, `arc must be a circuit; outbound peak ${outbound} vs inbound peak ${inbound}`);
+  assert.equal(rises.at(0), 0, 'the circuit starts in a hand');
+  assert.equal(rises.at(-1), 0, 'the circuit closes back in a hand');
+
+  const reduced = cssAtRuleBody(css, '@media (prefers-reduced-motion: reduce)');
+  assert.match(reduced, /\.juggle-figure[^{]*\{[^}]*animation:\s*none\s*!important/i, 'reduced motion stops the scene outright');
+  const restingPositions = [];
+  for (let slot = 1; slot <= 3; slot += 1) {
+    const rest = reduced.match(new RegExp(`\\.juggle-slot-${slot}\\s*\\{\\s*transform:\\s*translate\\(([^)]+)\\)\\s*!important`));
+    assert.ok(rest, `slot ${slot} needs an authored resting position`);
+    restingPositions.push(rest[1]);
+  }
+  assert.equal(new Set(restingPositions).size, 3, 'the rest frame spreads the marks instead of stacking them');
 });
 
 test('Synapse entry nodes reuse the selected and answer treatments', async () => {
@@ -755,6 +924,77 @@ test('enhancement implements pinned and fine-hover states without unsafe DOM API
   assertStaticScript(js);
 });
 
+test('enhancement safely does nothing on routes without project disclosures', async () => {
+  const js = await readSite('script.js');
+  assert.doesNotThrow(() => vm.runInNewContext(js, {
+    document: { querySelectorAll: () => [] },
+  }));
+});
+
+test('hover listeners exist only while a fine pointer is available', async () => {
+  class FakeEventTarget {
+    constructor() {
+      this.listeners = new Map();
+    }
+
+    addEventListener(type, listener) {
+      this.listeners.set(type, listener);
+    }
+
+    removeEventListener(type, listener) {
+      if (this.listeners.get(type) === listener) this.listeners.delete(type);
+    }
+
+    dispatch(type) {
+      this.listeners.get(type)?.({});
+    }
+  }
+
+  class FakeProject extends FakeEventTarget {
+    constructor() {
+      super();
+      this.open = false;
+      this.summary = new FakeEventTarget();
+      this.classList = { add() {}, remove() {}, contains: () => false };
+    }
+
+    querySelector(selector) {
+      return selector === '.project-summary' ? this.summary : null;
+    }
+  }
+
+  const projects = [new FakeProject(), new FakeProject(), new FakeProject()];
+  const fineHover = new FakeEventTarget();
+  fineHover.matches = false;
+  const js = await readSite('script.js');
+  assert.match(js, /function updateHoverListeners\(\)/);
+
+  vm.runInNewContext(js, {
+    document: { querySelectorAll: () => projects },
+    setTimeout,
+    window: { matchMedia: () => fineHover },
+  });
+
+  for (const project of projects) {
+    assert.equal(project.listeners.has('pointerenter'), false);
+    assert.equal(project.listeners.has('pointerleave'), false);
+  }
+
+  fineHover.matches = true;
+  fineHover.dispatch('change');
+  for (const project of projects) {
+    assert.equal(project.listeners.has('pointerenter'), true);
+    assert.equal(project.listeners.has('pointerleave'), true);
+  }
+
+  fineHover.matches = false;
+  fineHover.dispatch('change');
+  for (const project of projects) {
+    assert.equal(project.listeners.has('pointerenter'), false);
+    assert.equal(project.listeners.has('pointerleave'), false);
+  }
+});
+
 test('enhancement applies progressive disclosure states and keyboard activation through real controller events', async () => {
   class FakeClassList {
     constructor(trace) {
@@ -788,6 +1028,10 @@ test('enhancement applies progressive disclosure states and keyboard activation 
 
     addEventListener(type, listener) {
       this.listeners.set(type, listener);
+    }
+
+    removeEventListener(type, listener) {
+      if (this.listeners.get(type) === listener) this.listeners.delete(type);
     }
 
     dispatch(type, init = {}) {
@@ -872,11 +1116,11 @@ test('enhancement applies progressive disclosure states and keyboard activation 
   projects[1].summary.dispatch('click');
   projects[2].dispatch('pointerenter');
   assert.equal(projects[2].classList.contains('is-preview'), true);
+  fineHover.matches = false;
   fineHover.dispatch('change');
   assert.equal(projects[2].open, false);
   assert.equal(projects[2].classList.contains('is-preview'), false);
 
-  fineHover.matches = false;
   projects[2].dispatch('pointerenter');
   assert.equal(projects[2].open, false);
 
@@ -980,32 +1224,43 @@ test('enhancement applies progressive disclosure states and keyboard activation 
 
 test('artifact manifest and size stay inside the approved budget', async () => {
   const files = await listFiles(siteDir);
-  assert.deepEqual(files, ['assets/favicon.svg', 'index.html', 'script.js', 'styles.css']);
+  assert.deepEqual(files, approvedArtifactFiles);
   let total = 0;
   for (const file of files) total += (await stat(path.join(siteDir, file))).size;
   assert.ok(total <= 150_000, `artifact is ${total} bytes`);
   assert.ok((await stat(path.join(siteDir, 'script.js'))).size <= 10_000);
 });
 
-test('HTML enforces the approved static security boundary', async () => {
-  const html = await readSite('index.html');
-  assertApprovedHeadElements(html);
-  assertApprovedUrls(html);
-  assertStaticHtmlElements(html);
+test('every public route enforces the static security boundary and uses only real local destinations', async () => {
+  for (const route of publicHtmlRoutes) {
+    const html = await readSite(route);
+    assertRouteHeadElements(route, html);
+    assertRouteLinks(route, html);
+    assertStaticHtmlElements(html);
+  }
 });
 
-test('public artifact has no draft markers or prohibited personal content', async () => {
+test('public artifact has no draft markers or prohibited public controls', async () => {
   const files = await listFiles(siteDir);
   const contents = await Promise.all(files.map((file) => readFile(path.join(siteDir, file), 'utf8')));
   const artifact = contents.join('\n');
+  const publicHtmlArtifact = (await Promise.all(publicHtmlRoutes.map((route) => readSite(route)))).join('\n');
+  const publicText = decodeTextEntities(publicHtmlArtifact.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, ' '));
   for (let index = 0; index < files.length; index += 1) {
     assertApprovedRemoteUrls(files[index], contents[index]);
     assertNoDraftComments(files[index], contents[index]);
   }
-  assertNoDraftContent(await readSite('index.html'));
+  for (const route of publicHtmlRoutes) {
+    const html = await readSite(route);
+    assertSafePlaceholderContent(html);
+    assertNoDraftContent(html.replaceAll('placeholder', 'pending'));
+  }
   assertNoSecrets(artifact);
   assertNoPrivateEndpoints(artifact);
+  assert.doesNotMatch(artifact, /\b(?:manager|importer)\b/i);
   assert.doesNotMatch(artifact, /Auburn|@gmail\.com|mailto:|tel:|street address|university|degree|early prototype|active development/i);
+  assert.doesNotMatch(publicHtmlArtifact, /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i, 'public artifact must not publish an email address');
+  assert.doesNotMatch(publicText, /(?:\+?\d{1,2}[-. ()])?(?:\d{3}[-. )])\d{3}[-. ]\d{4}/, 'public artifact must not publish a telephone number');
   assert.doesNotMatch(artifact, /ochre|#C5A253/i);
 });
 
@@ -1224,4 +1479,51 @@ test('predeployment checklist enforces the local-to-authorized-live acceptance o
   const liveAcceptance = checklist.indexOf('## Post-authorization live-URL acceptance');
   assert.ok(authorizationGate >= 0 && authorizationGate < liveAcceptance, 'explicit authorization must precede live-URL acceptance');
   assert.match(checklist, /All post-authorization live-URL items must have evidence before the release is called accepted or publicly verified\./);
+});
+
+test('route-wide editorial visual contract styles every public page without changing the home juggler', async () => {
+  const css = await readSite('styles.css');
+  const favicon = await readFile(path.join(siteDir, 'assets', 'favicon.svg'), 'utf8');
+
+  for (const color of ['#F3EFE6', '#E8E4D8', '#FBFAF6', '#1E2924', '#66716A', '#356351', '#B86F4B', '#718999', '#DFE6DC', '#C9C5BA']) {
+    assert.match(css, new RegExp(color, 'i'), `editorial palette includes ${color}`);
+  }
+  assert.match(css, /--display:\s*Georgia,/i);
+  assert.match(css, /--sans:\s*'Segoe UI Variable',\s*'Segoe UI'/i);
+
+  for (const selector of ['.site-nav', '.page-footer', '.page-introduction', '.project-card', '.tag-list', '.certificate-card', '.certificate-image-placeholder', '.case-study', '.study-map', '.about-introduction', '.personal-compass', '.destination-list', '.values', '.workflow', '.diagram-placeholder']) {
+    assert.match(css, new RegExp(`\\${selector.replace('.', '.') }\\s*(?:,|\\{)`), `missing ${selector} route style`);
+  }
+
+  assert.match(css, /\.project-grid\s*,\s*\.certificate-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/i);
+  assert.match(css, /\.project-card\s*,\s*\.certificate-card\s*\{[^}]*min-height:\s*22rem[^}]*aspect-ratio:\s*1\s*\/\s*1/i);
+  assert.match(css, /\.tag-list\s*\{[^}]*flex-wrap:\s*wrap/i);
+  assert.match(css, /html,\s*body\s*\{[^}]*overflow-x:\s*clip/i);
+  assert.match(css, /:focus-visible\s*\{[^}]*outline:/i);
+  assert.match(css, /\.skip-link:focus-visible\s*\{[^}]*transform:\s*none/i);
+
+  const narrow = cssAtRuleBody(css, '@media (max-width: 700px)');
+  assert.match(narrow, /\.project-grid,\s*\.certificate-grid\s*\{[^}]*grid-template-columns:\s*1fr/i);
+  assert.match(narrow, /\.about-introduction\s*\{[^}]*grid-template-columns:\s*1fr/i);
+  assert.match(narrow, /\.page-shell\s+\.site-nav\s*,[\s\S]*?\{[^}]*flex-wrap:\s*wrap/i);
+
+  const reduced = cssAtRuleBody(css, '@media (prefers-reduced-motion: reduce)');
+  assert.match(reduced, /animation:\s*none\s*!important/i);
+  assert.match(favicon, /^<svg\b/);
+  assert.doesNotMatch(favicon.replace('xmlns="http://www.w3.org/2000/svg"', ''), /<(?:script|image|use)\b|(?:href|xlink:href)\s*=|https?:|data:/i);
+  for (const color of ['#F3EFE6', '#1E2924', '#356351', '#B86F4B']) assert.match(favicon, new RegExp(color, 'i'));
+});
+
+test('home is the gateway to all public sections and featured certificates', async () => {
+  const html = await readSite('index.html');
+  assert.match(html, /<nav class="site-nav"[^>]*>[\s\S]*href="projects\/"[\s\S]*Projects[\s\S]*href="certificates\/"[\s\S]*Certificates[\s\S]*href="about\/"[\s\S]*About Me[\s\S]*<\/nav>/i);
+  assert.match(html, /<p class="eyebrow">Hello! My name is<\/p>/i);
+  assert.match(html, /<h1>\s*Injun Lee\.<\/h1>/i);
+  assert.match(html, /Featured Projects/);
+  assert.doesNotMatch(html, /Current work/);
+  assert.match(html, /<section class="home-certificates"[\s\S]*>\s*<h2[^>]*>Certificates<\/h2>/i);
+  assert.equal((html.match(/class="home-certificate-card\b/g) ?? []).length, 3);
+  assert.match(html, /Simply a work in progress/);
+  assert.match(html, /A Little About Me/);
+  assert.match(html, /href="about\/"[^>]*>Read more/);
 });
