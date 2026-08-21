@@ -2,10 +2,10 @@
 
 - Status: closed
 - First observed: 2026-08-01 19:14 CDT
-- Last observed: 2026-08-01 21:19 CDT
+- Last observed: 2026-08-02 12:49 CDT
 - Phase/task: product design visual companion startup
 - Environment: Codex desktop on Windows
-- Version/commit: no Git repository exists yet
+- Version/commit: `ad56050`
 - Owner: primary agent
 
 ## Symptom and impact
@@ -67,6 +67,18 @@ The Revision 9 transformation intentionally retained the word `ochre` in explana
 
 A combined specification check embedded an apostrophe-bearing phrase inside a PowerShell single-quoted regular expression. PowerShell rejected the command during parsing before any check ran or any file changed. This repeats the earlier quote-safety failure category. The retry will count the quote-free word `shaping` and avoid nesting apostrophe-bearing text in PowerShell string literals.
 
+### Recurrence at 2026-08-02 01:17 CDT
+
+The persisted visual-companion session had a valid `server-info` file and no `server-stopped` marker, but an authenticated loopback request could not connect. The previous supervised process had ended, leaving stale lifecycle evidence. No public service, portfolio code, or user data was affected. The same authenticated session will be restarted on its recorded port before a new comparison screen is written.
+
+The first post-restart content check inspected the expected 305-byte authentication bridge returned when the session key is exchanged for a cookie, so its missing-fragment result did not describe the active screen. A cookie-preserving second request reached the comparison page. The hypothesis that file timestamp ordering retained the old screen was rejected because the new file was already newest and the authenticated second request returned it.
+
+### Recurrence at 2026-08-02 12:46 CDT
+
+The documented Bash launch was retried with the existing Windows drive-letter path. Git Bash translated the command context but did not resolve the `C:/...` script argument, and the launcher exited before starting a server. PowerShell then confirmed the launcher still exists at the expected skill location. No portfolio source, public site, browser data, or user content changed. The recurrence is contained; the next attempt will use the already-verified direct Node server fallback rather than retrying Bash.
+
+The direct Node fallback then started an authenticated loopback companion on a checked, non-excluded port. Two cookie-preserving requests returned HTTP 200 and the active comparison screen, no `server-stopped` marker existed, and the user approved the proposed Prompt-to-Model-B and Router-to-Answer treatment. This recurrence is closed without a portfolio-code change.
+
 ## Correction and prevention
 
 Use the supplied `server.cjs` directly through `C:/Program Files/nodejs/node.exe`, preserving the launcher's project-local session directory, loopback bind, authenticated token, persistent port/token files, browser-open opt-in, and disabled telemetry. Select an explicit port only after checking it against active listeners and Windows excluded TCP ranges.
@@ -83,4 +95,4 @@ The quote-safe specification check completed with zero `TODO` or `TBD` markers, 
 
 ## Next diagnostic step
 
-None; Revision 7 and the restarted review window are verified.
+None. On this Windows environment, use the direct Node fallback first and verify both authenticated HTTP delivery and the visible comparison before requesting approval.

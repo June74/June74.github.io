@@ -2,7 +2,7 @@
 
 - Status: closed
 - First observed: 2026-08-01 18:48 CDT
-- Last observed: 2026-08-01 18:49 CDT
+- Last observed: 2026-08-02 00:14 CDT
 - Phase/task: portfolio repository discovery
 - Environment: Codex desktop on Windows
 - Version/commit: no Git repository exists yet
@@ -26,6 +26,14 @@ PowerShell resolved `rg.exe` first through `<user-root>/AppData/Local/Microsoft/
 ## Attempts and outcomes
 
 Native PowerShell enumeration completed the discovery. Calling the Codex-bundled ripgrep executable by absolute path also succeeded.
+
+### Recurrence at 2026-08-01 22:35 CDT
+
+During Task 4's manual static-artifact review, the default `rg.exe` path again could not start. The security reviewer used the previously verified native PowerShell `Select-String` fallback, completed the scan, and reported no effect on tests or artifact output. No new cause or exposure was introduced.
+
+### Recurrence at 2026-08-02 00:14 CDT
+
+During the MM sample-number reconciliation task, the default `rg.exe` path again resolved to the non-executable WinGet link and stopped a read-only search. The developer contained the issue by using the already verified native PowerShell fallback. No source edit, test result, or private data was affected.
 
 ## Correction and prevention
 
